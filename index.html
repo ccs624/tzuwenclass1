@@ -70,50 +70,226 @@
     <p id="footerTitle">慈文國小一年一班 · 班級網頁</p>
   </footer>
 
-  <!-- 老師管理面板：第一階段使用瀏覽器本機儲存示範，之後再接 Firebase。 -->
-  <div id="adminModal" class="modal hidden">
-    <div class="modal-content">
-      <button id="closeAdmin" class="close-btn">×</button>
-      <h2>老師管理</h2>
-      <p class="notice">目前是第一階段示範版：資料只會儲存在「這台裝置、這個瀏覽器」。接上 Firebase 後，才會真正同步到網站。</p>
+<div id="adminModal" class="modal hidden">
 
-      <div class="admin-block">
-        <h3>首頁照片</h3>
-        <input id="homePhotosInput" type="file" accept="image/*" multiple>
-        <button id="saveHomePhotos" class="primary-btn">加入首頁輪播</button>
+  <div class="admin-panel">
+
+    <!-- 關閉按鈕 -->
+    <button id="closeAdmin" class="modal-close" type="button">
+      ×
+    </button>
+
+    <!-- ============================= -->
+    <!-- 老師登入畫面 -->
+    <!-- ============================= -->
+
+    <div id="loginView">
+
+      <div class="admin-heading">
+        <span class="eyebrow">TEACHER LOGIN</span>
+        <h2>老師登入</h2>
+        <p>登入後才能管理班級網站內容。</p>
       </div>
 
-      <div class="admin-block">
-        <h3>上傳課表</h3>
-        <input id="scheduleInput" type="file" accept="image/*">
-        <button id="saveSchedule" class="primary-btn">顯示課表</button>
-      </div>
+      <form id="loginForm">
 
-      <div class="admin-block">
-        <h3>新增活動</h3>
-        <label>活動名稱
-          <input id="eventName" type="text" placeholder="例如：校外教學">
+        <label>
+          電子郵件
+          <input
+            id="loginEmail"
+            type="email"
+            placeholder="請輸入老師帳號"
+            required
+          >
         </label>
-        <label>活動日期
-          <input id="eventDate" type="date">
-        </label>
-        <label>選擇照片
-          <input id="eventPhotosInput" type="file" accept="image/*" multiple>
-        </label>
-        <p class="hint">照片會在上傳前自動縮小、轉成 WebP，並保留比例。</p>
-        <div id="photoPreview" class="preview-grid"></div>
-        <div class="preview-actions">
-          <button id="clearPreview" class="secondary-btn">清除預覽</button>
-          <button id="saveEvent" class="primary-btn">確認發布活動</button>
-        </div>
-      </div>
 
-      <div class="admin-block">
-        <h3>第一階段資料</h3>
-        <button id="clearAllData" class="danger-btn">清除本機所有網站資料</button>
-      </div>
+        <label>
+          密碼
+          <input
+            id="loginPassword"
+            type="password"
+            placeholder="請輸入密碼"
+            required
+          >
+        </label>
+
+        <button
+          id="loginButton"
+          class="primary-btn"
+          type="submit"
+        >
+          登入
+        </button>
+
+        <p id="loginMessage" class="login-message"></p>
+
+      </form>
+
     </div>
+
+
+    <!-- ============================= -->
+    <!-- 登入後的老師管理畫面 -->
+    <!-- ============================= -->
+
+    <div id="adminView" class="hidden">
+
+      <div class="admin-heading">
+        <span class="eyebrow">TEACHER ADMIN</span>
+
+        <h2>老師管理</h2>
+
+        <p>
+          已登入：
+          <span id="teacherEmail"></span>
+        </p>
+
+        <button
+          id="logoutButton"
+          class="secondary-btn"
+          type="button"
+        >
+          登出
+        </button>
+      </div>
+
+
+      <!-- 首頁照片 -->
+
+      <div class="admin-block">
+
+        <h3>首頁照片</h3>
+
+        <input
+          id="homePhotosInput"
+          type="file"
+          accept="image/*"
+          multiple
+        >
+
+        <button
+          id="saveHomePhotos"
+          class="primary-btn"
+          type="button"
+        >
+          加入首頁輪播
+        </button>
+
+      </div>
+
+
+      <!-- 課表 -->
+
+      <div class="admin-block">
+
+        <h3>上傳課表</h3>
+
+        <input
+          id="scheduleInput"
+          type="file"
+          accept="image/*"
+        >
+
+        <button
+          id="saveSchedule"
+          class="primary-btn"
+          type="button"
+        >
+          顯示課表
+        </button>
+
+      </div>
+
+
+      <!-- 新增活動 -->
+
+      <div class="admin-block">
+
+        <h3>新增活動</h3>
+
+        <label>
+          活動名稱
+
+          <input
+            id="eventName"
+            type="text"
+            placeholder="例如：校外教學"
+          >
+        </label>
+
+        <label>
+          活動日期
+
+          <input
+            id="eventDate"
+            type="date"
+          >
+        </label>
+
+        <label>
+          選擇照片
+
+          <input
+            id="eventPhotosInput"
+            type="file"
+            accept="image/*"
+            multiple
+          >
+        </label>
+
+        <p class="hint">
+          照片會在上傳前自動縮小、轉成 WebP，並保留比例。
+        </p>
+
+        <div
+          id="photoPreview"
+          class="preview-grid"
+        ></div>
+
+        <div class="preview-actions">
+
+          <button
+            id="clearPreview"
+            class="secondary-btn"
+            type="button"
+          >
+            清除預覽
+          </button>
+
+          <button
+            id="saveEvent"
+            class="primary-btn"
+            type="button"
+          >
+            確認發布活動
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- 第一階段資料 -->
+
+      <div class="admin-block">
+
+        <h3>第一階段資料</h3>
+
+        <button
+          id="clearAllData"
+          class="danger-btn"
+          type="button"
+        >
+          清除本機所有網站資料
+        </button>
+
+      </div>
+
+    </div>
+
   </div>
+
+</div>
 
  <script type="module" src="script.js"></script>
 </body>
