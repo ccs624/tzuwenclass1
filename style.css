@@ -397,3 +397,35 @@ footer {
   .modal { padding: 8px; }
   .modal-content { padding: 20px 15px; margin: 8px auto; }
 }
+
+/* ==========================================================
+   老師登入
+   ========================================================== */
+
+.login-message {
+  min-height: 24px;
+  margin-top: 12px;
+  color: #a35b32;
+  font-size: 0.9rem;
+}
+
+.admin-heading {
+  margin-bottom: 28px;
+}
+
+.admin-heading h2 {
+  margin: 6px 0;
+}
+
+.admin-heading p {
+  color: var(--muted);
+}
+
+#teacherEmail {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+#logoutButton {
+  margin-top: 12px;
+}
