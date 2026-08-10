@@ -47,6 +47,150 @@ const db = getFirestore(app);
 console.log("Firebase 已成功連線！");
 
 
+// ==========================================================
+// 老師登入系統
+// ==========================================================
+
+const loginView = document.getElementById("loginView");
+const adminView = document.getElementById("adminView");
+
+const loginForm = document.getElementById("loginForm");
+
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+
+const loginMessage = document.getElementById("loginMessage");
+
+const teacherEmail = document.getElementById("teacherEmail");
+
+const logoutButton = document.getElementById("logoutButton");
+
+
+// ----------------------------------------------------------
+// 監控登入狀態
+// ----------------------------------------------------------
+
+onAuthStateChanged(auth, (user) => {
+
+  if (user) {
+
+    // 已登入
+
+    console.log("老師已登入：", user.email);
+
+    loginView.classList.add("hidden");
+
+    adminView.classList.remove("hidden");
+
+    teacherEmail.textContent = user.email;
+
+  } else {
+
+    // 尚未登入
+
+    console.log("目前沒有老師登入");
+
+    loginView.classList.remove("hidden");
+
+    adminView.classList.add("hidden");
+
+    teacherEmail.textContent = "";
+
+  }
+
+});
+
+
+// ----------------------------------------------------------
+// 老師登入
+// ----------------------------------------------------------
+
+loginForm.addEventListener("submit", async (event) => {
+
+  event.preventDefault();
+
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+
+  if (!email || !password) {
+
+    loginMessage.textContent =
+      "請輸入電子郵件與密碼。";
+
+    return;
+  }
+
+
+  loginMessage.textContent =
+    "登入中...";
+
+
+  try {
+
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    loginMessage.textContent =
+      "";
+
+    loginPassword.value = "";
+
+  } catch (error) {
+
+    console.error("登入失敗：", error);
+
+    if (
+      error.code === "auth/invalid-credential"
+    ) {
+
+      loginMessage.textContent =
+        "電子郵件或密碼錯誤。";
+
+    } else if (
+      error.code === "auth/too-many-requests"
+    ) {
+
+      loginMessage.textContent =
+        "登入失敗次數過多，請稍後再試。";
+
+    } else {
+
+      loginMessage.textContent =
+        "登入失敗，請稍後再試。";
+
+    }
+
+  }
+
+});
+
+
+// ----------------------------------------------------------
+// 老師登出
+// ----------------------------------------------------------
+
+logoutButton.addEventListener("click", async () => {
+
+  try {
+
+    await signOut(auth);
+
+    console.log("老師已登出");
+
+  } catch (error) {
+
+    console.error(
+      "登出失敗：",
+      error
+    );
+
+  }
+
+});
+
 
 
 // ==========================================================
