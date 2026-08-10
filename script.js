@@ -1,12 +1,11 @@
+
 // ==========================================
 // Firebase 設定
 // ==========================================
 
-// 從 Firebase CDN 載入 Firebase App
 import { initializeApp } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 
-// 載入 Firebase Authentication
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -15,34 +14,55 @@ import {
 } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
-// 載入 Cloud Firestore
 import {
   getFirestore
 } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 
-// 你的 Firebase 專案設定
+// Firebase 專案設定
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAQa6JsfIUQuYhxAJdqqJPfQ6kjUcXJMhM",
-  authDomain: "tzuwen1-1.firebaseapp.com",
-  databaseURL: "https://tzuwen1-1-default-rtdb.firebaseio.com",
-  projectId: "tzuwen1-1",
-  storageBucket: "tzuwen1-1.firebasestorage.app",
-  messagingSenderId: "419692782069",
-  appId: "1:419692782069:web:a5aa3bb9c2696b211840bc",
-  measurementId: "G-W1J3RTPHV8"
+
+  apiKey: "AIzaSyAQa6JsfIUQuYhxAJdqqJPQf6kjUcXJMhM",
+
+  authDomain:
+    "tzuwen1-1.firebaseapp.com",
+
+  databaseURL:
+    "https://tzuwen1-1-default-rtdb.firebaseio.com",
+
+  projectId:
+    "tzuwen1-1",
+
+  storageBucket:
+    "tzuwen1-1.firebasestorage.app",
+
+  messagingSenderId:
+    "419692782069",
+
+  appId:
+    "1:419692782069:web:a5aa3bb9c2696b211840bc",
+
+  measurementId:
+    "G-W1J3RTPHV8"
 };
 
 
 // 初始化 Firebase
+
 const app = initializeApp(firebaseConfig);
 
-// 初始化 Authentication
+
+// Firebase Authentication
+
 const auth = getAuth(app);
 
-// 初始化 Firestore
+
+// Cloud Firestore
+
 const db = getFirestore(app);
+
 
 console.log("Firebase 已成功連線！");
 
