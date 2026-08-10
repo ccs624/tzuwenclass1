@@ -404,6 +404,9 @@ footer {
   color: #a35b32;
   font-size: 0.9rem;
 }
+ .hidden {
+  display: none !important;
+} 
 
 .admin-heading {
   margin-bottom: 28px;
