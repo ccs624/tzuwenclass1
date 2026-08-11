@@ -158,14 +158,19 @@ loginForm.addEventListener("submit", async (event) => {
 
     loginPassword.value = "";
 
-  } catch (error) {
+} catch (error) {
 
-    console.error("登入失敗：", error);
+  // 把 Firebase 真正回傳的錯誤顯示在 Console
+  console.error("========== Firebase 登入錯誤 ==========");
+  console.error("錯誤代碼：", error.code);
+  console.error("錯誤訊息：", error.message);
+  console.error("完整錯誤：", error);
 
-    if (
-      error.code === "auth/invalid-credential"
-    ) {
+  // 同時顯示錯誤代碼，方便我們判斷問題
+  loginMessage.textContent =
+    `登入失敗：${error.code}`;
 
+}
       loginMessage.textContent =
         "電子郵件或密碼錯誤。";
 
