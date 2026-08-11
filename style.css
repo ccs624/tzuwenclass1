@@ -432,3 +432,22 @@ footer {
   .modal { padding: 8px; }
   .modal-content { padding: 20px 15px; margin: 8px auto; }
 }
+
+
+/* ==========================================
+   老師登入視窗
+   ========================================== */
+
+/* 整個背景遮罩 */
+#adminModal {
+  background: rgba(30, 30, 30, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+/* 登入視窗本身一定要是不透明的 */
+#adminModal .admin-panel {
+  background: #fffdf8;
+  opacity: 1;
+  position: relative;
+  z-index: 1;
+}
