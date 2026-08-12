@@ -439,98 +439,89 @@ function renderEvents() {
         </div>
 
 
-        <!-- 查看全部照片 -->
-        <button
-          class="view-event-btn"
-          type="button"
-          data-event-index="${eventIndex}"
-        >
-          ${viewButtonText}
-        </button>
 
-      </article>
-    `;
-
-  }).join("");
-
-
-  // 為每個「查看全部照片」按鈕加入點擊事件
-  document.querySelectorAll(".view-event-btn").forEach(button => {
-
-    button.addEventListener("click", () => {
-
-      const eventIndex = Number(
-        button.dataset.eventIndex
-      );
-
-      openEventDetail(eventIndex);
-
-    });
-
-  });
+    
 
 }
 
+// ==========================================
+// 查看活動全部照片
+// ==========================================
 
-/* ==========================================
-   活動詳細頁
-   ========================================== */
+document.addEventListener("click", event => {
 
-/*
- * 開啟某一個活動的詳細照片頁
- */
-function openEventDetail(eventIndex) {
+  const button = event.target.closest(".view-event-btn");
+
+  if (!button) return;
+
+  const eventId = button.dataset.eventId;
+
+  openEventDetail(eventId);
+
+});
+
+// ==========================================
+// 活動詳細照片頁
+// ==========================================
+
+const eventDetail = document.getElementById("eventDetail");
+const eventDetailTitle = document.getElementById("eventDetailTitle");
+const eventDetailDate = document.getElementById("eventDetailDate");
+const eventDetailPhotos = document.getElementById("eventDetailPhotos");
+
+
+// 開啟活動詳細頁
+function openEventDetail(eventId) {
 
   const data = loadData();
-  const event = data.events[eventIndex];
 
-  if (!event) return;
+  // 找到被點擊的活動
+  const event = data.events.find(
+    item => String(item.id) === String(eventId)
+  );
 
-
-  const detailPage =
-    document.getElementById("eventDetail");
-
-  const detailName =
-    document.getElementById("detailEventName");
-
-  const detailDate =
-    document.getElementById("detailEventDate");
-
-  const detailPhotoGrid =
-    document.getElementById("detailPhotoGrid");
+  if (!event) {
+    alert("找不到這個活動。");
+    return;
+  }
 
 
-  // 顯示活動名稱
-  detailName.textContent = event.name;
+  // ==========================================
+  // 填入活動名稱與日期
+  // ==========================================
 
-  // 顯示活動日期
-  detailDate.textContent = formatDate(event.date);
+  eventDetailTitle.textContent = event.name;
+  eventDetailDate.textContent = formatDate(event.date);
 
 
-  // 顯示這個活動的全部照片
-  detailPhotoGrid.innerHTML =
-    event.photos.map((photo, photoIndex) => `
+  // ==========================================
+  // 顯示這個活動的所有照片
+  // ==========================================
 
-      <div class="detail-photo-item">
+  eventDetailPhotos.innerHTML = event.photos
+    .map((photo, index) => `
+      <div class="event-detail-photo">
 
         <img
           src="${photo.dataUrl}"
-          alt="${escapeHtml(event.name)} 第 ${photoIndex + 1} 張照片"
+          alt="${escapeHtml(event.name)} 第${index + 1}張照片"
+          loading="lazy"
         >
 
       </div>
+    `)
+    .join("");
 
-    `).join("");
 
+  // ==========================================
+  // 隱藏一般網站內容
+  // ==========================================
 
-  // 隱藏班級活動列表
-  document
-    .getElementById("photos")
-    .classList.add("hidden");
+  hideNormalContent();
 
 
   // 顯示活動詳細頁
-  detailPage.classList.remove("hidden");
+  eventDetail.classList.remove("hidden");
 
 
   // 回到頁面最上方
@@ -538,38 +529,80 @@ function openEventDetail(eventIndex) {
     top: 0,
     behavior: "smooth"
   });
-
 }
 
 
-/* ==========================================
-   返回班級活動列表
-   ========================================== */
+// ==========================================
+// 隱藏一般網站內容
+// ==========================================
 
-document
-  .getElementById("backToGallery")
-  .addEventListener("click", () => {
+function hideNormalContent() {
 
-    // 隱藏活動詳細頁
-    document
-      .getElementById("eventDetail")
-      .classList.add("hidden");
+  // 首頁照片輪播
+  const homeSection = document.querySelector(".hero");
 
+  // 課表
+  const scheduleSection = document.getElementById("schedule");
 
-    // 顯示班級活動
-    document
-      .getElementById("photos")
-      .classList.remove("hidden");
+  // 班級活動
+  const photosSection = document.getElementById("photos");
 
 
-    // 回到班級活動的位置
-    document
-      .getElementById("photos")
-      .scrollIntoView({
-        behavior: "smooth"
-      });
+  if (homeSection) {
+    homeSection.classList.add("hidden");
+  }
 
+  if (scheduleSection) {
+    scheduleSection.classList.add("hidden");
+  }
+
+  if (photosSection) {
+    photosSection.classList.add("hidden");
+  }
+}
+
+
+// ==========================================
+// 返回班級活動
+// ==========================================
+
+document.getElementById("backToEvents").addEventListener("click", () => {
+
+  // 隱藏活動詳細頁
+  eventDetail.classList.add("hidden");
+
+
+  // 顯示首頁
+  const homeSection = document.querySelector(".hero");
+
+  // 顯示課表
+  const scheduleSection = document.getElementById("schedule");
+
+  // 顯示班級活動
+  const photosSection = document.getElementById("photos");
+
+
+  if (homeSection) {
+    homeSection.classList.remove("hidden");
+  }
+
+  if (scheduleSection) {
+    scheduleSection.classList.remove("hidden");
+  }
+
+  if (photosSection) {
+    photosSection.classList.remove("hidden");
+  }
+
+
+  // 回到班級活動的位置
+  document.getElementById("photos").scrollIntoView({
+    behavior: "smooth"
   });
+
+});
+
+
 
 
 /* ==========================================
