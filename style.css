@@ -451,3 +451,256 @@ footer {
   position: relative;
   z-index: 1;
 }
+
+
+/* ==========================================
+   班級活動 - 活動列表
+   ========================================== */
+
+/* 每個活動的卡片 */
+.event-card {
+  background: #fffdf8;
+  border: 1px solid rgba(120, 100, 70, 0.12);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(80, 65, 40, 0.06);
+}
+
+/* 活動標題區 */
+.event-header {
+  margin-bottom: 18px;
+}
+
+.event-header h3 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.event-date {
+  color: #887d6d;
+  font-size: 0.92rem;
+}
+
+
+/* ==========================================
+   活動預覽照片
+   每個活動只顯示最多 4 張
+   ========================================== */
+
+.event-preview-grid {
+  display: grid;
+
+  /* 電腦版：最多四張橫向排列 */
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+/*
+   預覽照片的框架
+
+   使用固定高度是為了讓活動列表整齊。
+   但圖片使用 contain，因此不會裁掉照片內容。
+*/
+.event-preview-item {
+  height: 180px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f3efe7;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-preview-item img {
+  width: 100%;
+  height: 100%;
+
+  /* 不裁切照片 */
+  object-fit: contain;
+
+  display: block;
+}
+
+
+/* ==========================================
+   查看全部照片按鈕
+   ========================================== */
+
+.view-event-btn {
+  border: none;
+  background: transparent;
+
+  color: #75633f;
+
+  font-size: 0.98rem;
+  font-weight: 600;
+
+  padding: 6px 0;
+
+  cursor: pointer;
+}
+
+.view-event-btn:hover {
+  text-decoration: underline;
+}
+
+
+/* ==========================================
+   活動詳細頁
+   ========================================== */
+
+.event-detail-page {
+  min-height: 100vh;
+  padding: 40px 20px 80px;
+
+  background: #fffdf8;
+}
+
+.event-detail-inner {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+}
+
+
+/* 返回按鈕 */
+
+.back-btn {
+  border: none;
+  background: transparent;
+
+  color: #75633f;
+
+  font-size: 1rem;
+  font-weight: 600;
+
+  padding: 8px 0;
+  margin-bottom: 24px;
+
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  text-decoration: underline;
+}
+
+
+/* 活動詳細頁標題 */
+
+.event-detail-heading {
+  margin-bottom: 32px;
+}
+
+.event-detail-heading h2 {
+  margin: 0 0 8px;
+
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 600;
+}
+
+.event-detail-heading p {
+  margin: 0;
+  color: #887d6d;
+}
+
+
+/* ==========================================
+   活動詳細頁照片
+
+   不固定照片比例。
+   保留原始照片比例。
+   ========================================== */
+
+.detail-photo-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 24px;
+}
+
+
+/*
+   詳細頁照片容器
+
+   不設定固定高度。
+   因此直式、橫式照片都能保留自己的比例。
+*/
+.detail-photo-item {
+  background: #f3efe7;
+  border-radius: 16px;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-photo-item img {
+  width: 100%;
+  height: auto;
+
+  /* 保留照片原本比例 */
+  object-fit: contain;
+
+  display: block;
+}
+
+
+/* ==========================================
+   隱藏元素
+   ========================================== */
+
+.hidden {
+  display: none !important;
+}
+
+
+/* ==========================================
+   手機版
+   ========================================== */
+
+@media (max-width: 768px) {
+
+  /* 活動預覽改成兩張一排 */
+  .event-preview-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .event-preview-item {
+    height: 150px;
+  }
+
+  /* 詳細照片改成一張一排 */
+  .detail-photo-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .event-card {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .event-detail-page {
+    padding: 28px 16px 60px;
+  }
+
+}
+
+
+/* ==========================================
+   更小的手機
+   ========================================== */
+
+@media (max-width: 480px) {
+
+  .event-preview-item {
+    height: 130px;
+  }
+
+}
