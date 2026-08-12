@@ -704,3 +704,142 @@ footer {
   }
 
 }
+
+
+
+
+/* ==========================================
+   活動詳細照片頁
+   ========================================== */
+
+/* 隱藏元素 */
+.hidden {
+  display: none !important;
+}
+
+
+/* 活動詳細頁的整體區域 */
+.event-detail {
+  min-height: 70vh;
+  padding: 40px 20px 80px;
+}
+
+
+/* 活動詳細頁內容最大寬度 */
+.event-detail-inner {
+  width: min(1100px, 100%);
+  margin: 0 auto;
+}
+
+
+/* 返回按鈕 */
+.back-btn {
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  margin-bottom: 30px;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  color: #6f5a32;
+
+  transition: opacity 0.2s ease;
+}
+
+.back-btn:hover {
+  opacity: 0.65;
+}
+
+
+/* 活動標題 */
+.event-detail-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.event-detail-header .eyebrow {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.event-detail-header h2 {
+  margin: 0;
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 600;
+}
+
+.event-detail-header p {
+  margin-top: 10px;
+  color: #8a7a5b;
+  font-size: 15px;
+}
+
+
+/* ==========================================
+   活動詳細照片
+
+   使用原本照片比例，不強制裁切
+   ========================================== */
+
+.event-detail-photos {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+
+/* 每張照片的容器 */
+.event-detail-photo {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #f7f4ed;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+
+/* 照片本身 */
+.event-detail-photo img {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  object-fit: contain;
+}
+
+
+/* ==========================================
+   手機版
+   ========================================== */
+
+@media (max-width: 600px) {
+
+  .event-detail {
+    padding: 25px 15px 60px;
+  }
+
+  .event-detail-header {
+    margin-bottom: 25px;
+  }
+
+  .event-detail-header h2 {
+    font-size: 28px;
+  }
+
+  .event-detail-photos {
+    gap: 18px;
+  }
+
+  .event-detail-photo {
+    border-radius: 12px;
+  }
+
+}
