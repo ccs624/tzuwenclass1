@@ -79,34 +79,37 @@
 </section>
 
 
-<!-- ==========================================
-     活動詳細照片頁面
-     
-     平常隱藏。
-     家長點擊「查看全部照片」後才會顯示。
+    <!-- ==========================================
+     活動詳細照片區
+     預設隱藏，點擊「查看全部照片」後才會顯示
      ========================================== -->
-<section id="eventDetail" class="event-detail-page hidden">
+<section id="eventDetail" class="event-detail hidden">
 
   <div class="event-detail-inner">
 
-    <!-- 返回按鈕 -->
-    <button id="backToGallery" class="back-btn">
+    <!-- 返回班級活動 -->
+    <button id="backToEvents" class="back-btn">
       ← 返回班級活動
     </button>
 
     <!-- 活動標題 -->
-    <div class="event-detail-heading">
-      <h2 id="detailEventName"></h2>
-      <p id="detailEventDate"></p>
+    <div class="event-detail-header">
+      <span class="eyebrow">MEMORIES</span>
+      <h2 id="eventDetailTitle">活動名稱</h2>
+      <p id="eventDetailDate"></p>
     </div>
 
-    <!-- 活動全部照片 -->
-    <div id="detailPhotoGrid" class="detail-photo-grid">
+    <!-- 活動所有照片 -->
+    <div id="eventDetailPhotos" class="event-detail-photos">
+      <!-- JavaScript 會把照片放在這裡 -->
     </div>
 
   </div>
 
 </section>
+
+
+
   </main>
 
   <footer>
