@@ -373,14 +373,10 @@ function formatDate(date) {
  * 顯示「班級活動」列表
  *
  * 每個活動最多只顯示 4 張預覽照片。
- *
- * 如果活動有超過 4 張照片，
- * 就顯示「查看全部照片」按鈕。
  */
 function renderEvents() {
 
   const data = loadData();
-
   const list = document.getElementById("galleryList");
 
   if (!data.events.length) {
@@ -396,27 +392,12 @@ function renderEvents() {
   }
 
 
-  /*
-   * 建立每一個活動的卡片
-   */
   list.innerHTML = data.events.map((event, eventIndex) => {
 
-    /*
-     * 只取前 4 張照片作為活動列表預覽。
-     *
-     * 原本活動可能有 50 張，
-     * 這裡只顯示 4 張。
-     */
+    // 活動列表只顯示前 4 張照片
     const previewPhotos = event.photos.slice(0, 4);
 
-
-    /*
-     * 如果照片超過 4 張，
-     * 顯示「查看全部照片」。
-     *
-     * 如果只有 4 張或更少，
-     * 仍然可以查看活動。
-     */
+    // 如果超過 4 張，顯示總照片數
     const viewButtonText =
       event.photos.length > 4
         ? `查看全部照片（共 ${event.photos.length} 張） →`
@@ -426,7 +407,6 @@ function renderEvents() {
     return `
       <article class="event-card">
 
-        <!-- 活動名稱與日期 -->
         <div class="event-header">
 
           <h3>
@@ -440,11 +420,7 @@ function renderEvents() {
         </div>
 
 
-        <!--
-          活動預覽照片
-
-          只顯示前 4 張
-        -->
+        <!-- 活動預覽照片，只顯示最多 4 張 -->
         <div class="event-preview-grid">
 
           ${previewPhotos.map((photo, photoIndex) => `
@@ -478,9 +454,7 @@ function renderEvents() {
   }).join("");
 
 
-  /*
-   * 為所有「查看全部照片」按鈕加入點擊事件
-   */
+  // 為每個「查看全部照片」按鈕加入點擊事件
   document.querySelectorAll(".view-event-btn").forEach(button => {
 
     button.addEventListener("click", () => {
@@ -508,18 +482,11 @@ function renderEvents() {
 function openEventDetail(eventIndex) {
 
   const data = loadData();
-
   const event = data.events[eventIndex];
 
-  /*
-   * 如果找不到活動，就停止。
-   */
   if (!event) return;
 
 
-  /*
-   * 取得活動詳細頁需要的 HTML 元素
-   */
   const detailPage =
     document.getElementById("eventDetail");
 
@@ -533,27 +500,14 @@ function openEventDetail(eventIndex) {
     document.getElementById("detailPhotoGrid");
 
 
-  /*
-   * 放入活動名稱
-   */
+  // 顯示活動名稱
   detailName.textContent = event.name;
 
-
-  /*
-   * 放入活動日期
-   */
+  // 顯示活動日期
   detailDate.textContent = formatDate(event.date);
 
 
-  /*
-   * 建立全部照片
-   *
-   * 注意：
-   * 這裡不是 slice(0, 4)
-   *
-   * 所以活動有 50 張，
-   * 這裡就會顯示 50 張。
-   */
+  // 顯示這個活動的全部照片
   detailPhotoGrid.innerHTML =
     event.photos.map((photo, photoIndex) => `
 
@@ -569,22 +523,17 @@ function openEventDetail(eventIndex) {
     `).join("");
 
 
-  /*
-   * 隱藏原本的班級活動區
-   */
-  document.getElementById("photos")
+  // 隱藏班級活動列表
+  document
+    .getElementById("photos")
     .classList.add("hidden");
 
 
-  /*
-   * 顯示活動詳細頁
-   */
+  // 顯示活動詳細頁
   detailPage.classList.remove("hidden");
 
 
-  /*
-   * 回到頁面最上方
-   */
+  // 回到頁面最上方
   window.scrollTo({
     top: 0,
     behavior: "smooth"
@@ -601,25 +550,19 @@ document
   .getElementById("backToGallery")
   .addEventListener("click", () => {
 
-    /*
-     * 隱藏活動詳細頁
-     */
+    // 隱藏活動詳細頁
     document
       .getElementById("eventDetail")
       .classList.add("hidden");
 
 
-    /*
-     * 顯示班級活動
-     */
+    // 顯示班級活動
     document
       .getElementById("photos")
       .classList.remove("hidden");
 
 
-    /*
-     * 回到班級活動的位置
-     */
+    // 回到班級活動的位置
     document
       .getElementById("photos")
       .scrollIntoView({
@@ -627,6 +570,25 @@ document
       });
 
   });
+
+
+/* ==========================================
+   HTML 文字安全處理
+   ========================================== */
+
+function escapeHtml(text) {
+
+  return String(text || "").replace(/[&<>"']/g, char => ({
+
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+
+  }[char]));
+
+}
 
 // ---------- 7. 老師管理視窗 ----------
 const modal = document.getElementById("adminModal");
