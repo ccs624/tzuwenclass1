@@ -566,3 +566,38 @@ footer {
   }
 
 }
+
+
+
+/* ==========================================
+   查看全部照片按鈕
+   ========================================== */
+
+.event-actions {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.view-event-btn {
+  border: none;
+  background: transparent;
+
+  color: #75613a;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  padding: 8px 4px;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.view-event-btn:hover {
+  color: #a38443;
+  transform: translateX(3px);
+}
