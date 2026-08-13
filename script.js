@@ -321,8 +321,43 @@ function openEventDetail(eventId) {
 // 隱藏一般網站內容
 // ==========================================
 
-function hideNormalContent() {
+// ==========================================
+// 活動詳細頁：切換顯示模式
+// ==========================================
 
+function showNormalContent() {
+  // 首頁
+  const homeSection = document.querySelector(".hero");
+
+  // 課表
+  const scheduleSection = document.getElementById("schedule");
+
+  // 班級活動
+  const photosSection = document.getElementById("photos");
+
+  // 顯示一般內容
+  if (homeSection) {
+    homeSection.classList.remove("hidden");
+  }
+
+  if (scheduleSection) {
+    scheduleSection.classList.remove("hidden");
+  }
+
+  if (photosSection) {
+    photosSection.classList.remove("hidden");
+  }
+
+  // 隱藏活動詳細頁
+  eventDetail.classList.add("hidden");
+}
+
+
+// ==========================================
+// 隱藏一般內容，進入活動詳細頁
+// ==========================================
+
+function hideNormalContent() {
   // 首頁照片輪播
   const homeSection = document.querySelector(".hero");
 
@@ -332,7 +367,7 @@ function hideNormalContent() {
   // 班級活動
   const photosSection = document.getElementById("photos");
 
-
+  // 隱藏一般內容
   if (homeSection) {
     homeSection.classList.add("hidden");
   }
@@ -345,6 +380,80 @@ function hideNormalContent() {
     photosSection.classList.add("hidden");
   }
 }
+
+
+// ==========================================
+// 返回班級活動
+// ==========================================
+
+document.getElementById("backToEvents").addEventListener("click", () => {
+
+  showNormalContent();
+
+  // 回到班級活動區
+  document.getElementById("photos").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+
+
+// ==========================================
+// 上方導覽列
+// 首頁 / 課表 / 班級照片
+// ==========================================
+
+document.addEventListener("click", event => {
+
+  // 找到導覽列中的連結
+  const link = event.target.closest("a");
+
+  if (!link) return;
+
+  const href = link.getAttribute("href");
+
+  // 如果不是我們要處理的三個區域，就不處理
+  if (
+    href !== "#home" &&
+    href !== "#schedule" &&
+    href !== "#photos"
+  ) {
+    return;
+  }
+
+  // 如果目前正在活動詳細頁
+  if (!eventDetail.classList.contains("hidden")) {
+
+    // 阻止原本的跳轉
+    event.preventDefault();
+
+    // 先恢復一般網站內容
+    showNormalContent();
+
+    // 找到要前往的區域
+    let target;
+
+    if (href === "#home") {
+      target = document.querySelector(".hero");
+    }
+
+    if (href === "#schedule") {
+      target = document.getElementById("schedule");
+    }
+
+    if (href === "#photos") {
+      target = document.getElementById("photos");
+    }
+
+    // 平滑移動到指定區域
+    if (target) {
+      target.scrollIntoView({
+        behavior: "smooth"
+      });
+    }
+  }
+
+});
 
 
 // ==========================================
