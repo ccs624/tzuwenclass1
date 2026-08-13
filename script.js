@@ -219,20 +219,190 @@ function renderEvents() {
         </div>
       </div>
       <div class="photo-grid">
-        ${event.photos.map((photo, photoIndex) => `
-          <div class="photo-item">
-            <img src="${photo.dataUrl}" alt="${escapeHtml(event.name)} 第${photoIndex + 1}張照片">
-          </div>
-        `).join("")}
+      ${event.photos
+  .slice(0, 4)
+  .map((photo, photoIndex) => `
+    <div class="photo-item">
+      <img
+        src="${photo.dataUrl}"
+        alt="${escapeHtml(event.name)} 第${photoIndex + 1}張照片"
+      >
+    </div>
+  `)
+  .join("")}
       </div>
-      <div>
-        ${event.photos.map((photo, i) =>
-          `<a class="download-link" href="${photo.dataUrl}" download="${safeFileName(event.name)}-${i + 1}.webp">下載第 ${i + 1} 張</a>`
-        ).join("　")}
-      </div>
+  <div class="event-actions">
+
+  <button
+    class="view-event-btn"
+    data-event-id="${event.id}"
+  >
+    查看全部照片
+  </button>
+
+</div>
     </article>
   `).join("");
 }
+
+// ==========================================
+// 活動詳細照片頁
+// ==========================================
+
+const eventDetail = document.getElementById("eventDetail");
+const eventDetailTitle = document.getElementById("eventDetailTitle");
+const eventDetailDate = document.getElementById("eventDetailDate");
+const eventDetailPhotos = document.getElementById("eventDetailPhotos");
+
+
+// 開啟活動詳細頁
+function openEventDetail(eventId) {
+
+  const data = loadData();
+
+  // 找到被點擊的活動
+  const event = data.events.find(
+    item => String(item.id) === String(eventId)
+  );
+
+  if (!event) {
+    alert("找不到這個活動。");
+    return;
+  }
+
+
+  // ==========================================
+  // 填入活動名稱與日期
+  // ==========================================
+
+  eventDetailTitle.textContent = event.name;
+  eventDetailDate.textContent = formatDate(event.date);
+
+
+  // ==========================================
+  // 顯示這個活動的所有照片
+  // ==========================================
+
+  eventDetailPhotos.innerHTML = event.photos
+    .map((photo, index) => `
+      <div class="event-detail-photo">
+
+        <img
+          src="${photo.dataUrl}"
+          alt="${escapeHtml(event.name)} 第${index + 1}張照片"
+          loading="lazy"
+        >
+
+      </div>
+    `)
+    .join("");
+
+
+  // ==========================================
+  // 隱藏一般網站內容
+  // ==========================================
+
+  hideNormalContent();
+
+
+  // 顯示活動詳細頁
+  eventDetail.classList.remove("hidden");
+
+
+  // 回到頁面最上方
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
+// ==========================================
+// 隱藏一般網站內容
+// ==========================================
+
+function hideNormalContent() {
+
+  // 首頁照片輪播
+  const homeSection = document.querySelector(".hero");
+
+  // 課表
+  const scheduleSection = document.getElementById("schedule");
+
+  // 班級活動
+  const photosSection = document.getElementById("photos");
+
+
+  if (homeSection) {
+    homeSection.classList.add("hidden");
+  }
+
+  if (scheduleSection) {
+    scheduleSection.classList.add("hidden");
+  }
+
+  if (photosSection) {
+    photosSection.classList.add("hidden");
+  }
+}
+
+
+// ==========================================
+// 返回班級活動
+// ==========================================
+
+document.getElementById("backToEvents").addEventListener("click", () => {
+
+  // 隱藏活動詳細頁
+  eventDetail.classList.add("hidden");
+
+
+  // 顯示首頁
+  const homeSection = document.querySelector(".hero");
+
+  // 顯示課表
+  const scheduleSection = document.getElementById("schedule");
+
+  // 顯示班級活動
+  const photosSection = document.getElementById("photos");
+
+
+  if (homeSection) {
+    homeSection.classList.remove("hidden");
+  }
+
+  if (scheduleSection) {
+    scheduleSection.classList.remove("hidden");
+  }
+
+  if (photosSection) {
+    photosSection.classList.remove("hidden");
+  }
+
+
+  // 回到班級活動的位置
+  document.getElementById("photos").scrollIntoView({
+    behavior: "smooth"
+  });
+
+});
+
+
+// ==========================================
+// 查看活動全部照片
+// ==========================================
+
+document.addEventListener("click", event => {
+
+  const button = event.target.closest(".view-event-btn");
+
+  if (!button) return;
+
+  const eventId = button.dataset.eventId;
+
+  openEventDetail(eventId);
+
+});
 
 function escapeHtml(text) {
   return String(text || "").replace(/[&<>"']/g, char => ({
@@ -352,6 +522,7 @@ document.getElementById("saveEvent").addEventListener("click", () => {
   pendingPhotos = [];
   renderPreview();
   renderEvents();
+  
 
   alert("活動已發布。");
 });
