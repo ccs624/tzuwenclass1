@@ -15,10 +15,17 @@ import {
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 import {
-  getFirestore
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  orderBy,
+  query,
+  serverTimestamp
 } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
 
 // Firebase 專案設定
 
@@ -326,7 +333,7 @@ function renderSlideshow() {
   if (data.homePhotos.length > 1) {
     slideTimer = setInterval(() => {
       slideIndex = (slideIndex + 1) % data.homePhotos.length;
-      renderSlideshow();
+      Slideshow();
     }, 4000);
   }
 }
@@ -335,18 +342,18 @@ document.getElementById("prevSlide").addEventListener("click", () => {
   const data = loadData();
   if (!data.homePhotos.length) return;
   slideIndex = (slideIndex - 1 + data.homePhotos.length) % data.homePhotos.length;
-  renderSlideshow();
+  Slideshow();
 });
 
 document.getElementById("nextSlide").addEventListener("click", () => {
   const data = loadData();
   if (!data.homePhotos.length) return;
   slideIndex = (slideIndex + 1) % data.homePhotos.length;
-  renderSlideshow();
+  Slideshow();
 });
 
 // ---------- 5. 課表 ----------
-function renderSchedule() {
+function Schedule() {
   const data = loadData();
   const box = document.getElementById("scheduleDisplay");
 
@@ -365,6 +372,56 @@ function formatDate(date) {
   if (!date) return "";
   return date.replaceAll("-", "/");
 }
+
+// ==========================================
+// Firestore：讀取所有活動
+// ==========================================
+
+async function loadEventsFromFirestore() {
+
+  try {
+
+    // 取得 activities 集合
+    const activitiesRef = collection(db, "activities");
+
+    // 依照建立時間由新到舊排列
+    const q = query(
+      activitiesRef,
+      orderBy("createdAt", "desc")
+    );
+
+    // 取得 Firebase 裡的活動
+    const snapshot = await getDocs(q);
+
+    const events = [];
+
+    snapshot.forEach(documentSnapshot => {
+
+      const data = documentSnapshot.data();
+
+      events.push({
+        id: documentSnapshot.id,
+        name: data.name || "",
+        date: data.date || "",
+        photos: data.photos || []
+      });
+
+    });
+
+    console.log("Firestore 活動資料：", events);
+
+    return events;
+
+  } catch (error) {
+
+    console.error("讀取 Firestore 活動失敗：", error);
+
+    return [];
+
+  }
+
+}
+
 
 function renderEvents() {
   const data = loadData();
@@ -827,3 +884,15 @@ updateClassTitle();
 renderSlideshow();
 renderSchedule();
 renderEvents();
+
+// ==========================================
+// 測試 Firestore
+// ==========================================
+
+loadEventsFromFirestore().then(events => {
+
+  console.log(
+    `Firestore 目前有 ${events.length} 個活動`
+  );
+
+});
