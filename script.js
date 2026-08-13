@@ -15,10 +15,17 @@ import {
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 
 import {
-  getFirestore
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  orderBy,
+  query,
+  serverTimestamp
 } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
 
 // Firebase 專案設定
 
