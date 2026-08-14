@@ -338,6 +338,9 @@ function renderSlideshow() {
   }
 }
 
+
+
+
 document.getElementById("prevSlide").addEventListener("click", () => {
   const data = loadData();
   if (!data.homePhotos.length) return;
@@ -353,7 +356,7 @@ document.getElementById("nextSlide").addEventListener("click", () => {
 });
 
 // ---------- 5. 課表 ----------
-function Schedule() {
+function renderSchedule() {
   const data = loadData();
   const box = document.getElementById("scheduleDisplay");
 
