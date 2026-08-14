@@ -27,6 +27,19 @@ import {
 } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
+// ==========================================
+// Firebase Storage
+// 用來儲存老師上傳的照片
+// ==========================================
+
+import {
+  getStorage,
+  ref,
+  uploadString,
+  getDownloadURL
+} from
+  "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+
 // Firebase 專案設定
 
 const firebaseConfig = {
@@ -70,6 +83,8 @@ const auth = getAuth(app);
 
 const db = getFirestore(app);
 
+// 初始化 Firebase Storage
+const storage = getStorage(app);
 
 console.log("Firebase 已成功連線！");
 
@@ -307,6 +322,54 @@ function compressImage(file, maxWidth = 1600, quality = 0.85) {
     reader.onerror = () => reject(new Error("檔案讀取失敗"));
     reader.readAsDataURL(file);
   });
+}
+
+// ==========================================
+// 將壓縮後的 WebP 照片上傳到 Firebase Storage
+// ==========================================
+
+async function uploadPhotoToStorage(
+  dataUrl,
+  fileName
+) {
+
+  // 建立照片在 Firebase Storage 裡面的路徑
+  //
+  // 例如：
+  // activities/1723456789/001.webp
+  //
+  const storagePath =
+    "activities/" +
+    Date.now() +
+    "/" +
+    fileName;
+
+  // 建立 Storage 參照
+  const storageRef = ref(
+    storage,
+    storagePath
+  );
+
+  // 把 Data URL 上傳到 Storage
+  await uploadString(
+    storageRef,
+    dataUrl,
+    "data_url",
+    {
+      contentType: "image/webp"
+    }
+  );
+
+  // 取得照片可以公開讀取的網址
+  const downloadURL =
+    await getDownloadURL(storageRef);
+
+  console.log(
+    "照片上傳成功：",
+    downloadURL
+  );
+
+  return downloadURL;
 }
 
 // ---------- 4. 首頁輪播 ----------
@@ -1012,3 +1075,73 @@ loadEventsFromFirestore().then(events => {
   );
 
 });
+
+// ==========================================
+// 測試 Firebase Storage
+// ==========================================
+
+window.testFirebaseStorage = async function () {
+
+  try {
+
+    // 找到老師上傳照片的 input
+    const input =
+      document.getElementById("eventPhotosInput");
+
+    if (!input || !input.files.length) {
+
+      console.log(
+        "請先選擇一張照片，再執行測試。"
+      );
+
+      return;
+    }
+
+    // 取得第一張照片
+    const file = input.files[0];
+
+    console.log(
+      "開始處理照片：",
+      file.name
+    );
+
+
+    // 壓縮照片
+    const result =
+      await compressImage(file);
+
+
+    console.log(
+      "照片壓縮完成",
+      result
+    );
+
+
+    // 上傳 Firebase Storage
+    const url =
+      await uploadPhotoToStorage(
+        result.dataUrl,
+        "test-" + Date.now() + ".webp"
+      );
+
+
+    console.log(
+      "🎉 Firebase Storage 測試成功！"
+    );
+
+    console.log(
+      "照片網址：",
+      url
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Firebase Storage 測試失敗：",
+      error
+    );
+
+  }
+
+};
