@@ -831,34 +831,147 @@ function renderPreview() {
   `).join("");
 }
 
-// ---------- 11. 發布活動 ----------
-document.getElementById("saveEvent").addEventListener("click", () => {
+
+// ==========================================
+// 發布活動到 Firestore
+// ==========================================
+
+document.getElementById("saveEvent").addEventListener("click", async () => {
+
+  // 取得活動名稱
   const name = document.getElementById("eventName").value.trim();
+
+  // 取得活動日期
   const date = document.getElementById("eventDate").value;
 
-  if (!name) return alert("請輸入活動名稱。");
-  if (!pendingPhotos.length) return alert("請選擇至少一張照片。");
 
-  const data = loadData();
+  // ==========================================
+  // 基本檢查
+  // ==========================================
 
-  data.events.unshift({
-    id: Date.now(),
-    name,
-    date,
-    photos: [...pendingPhotos]
-  });
+  if (!name) {
+    alert("請輸入活動名稱。");
+    return;
+  }
 
-  saveData(data);
+  if (!pendingPhotos.length) {
+    alert("請選擇至少一張照片。");
+    return;
+  }
 
-  document.getElementById("eventName").value = "";
-  document.getElementById("eventDate").value = "";
-  document.getElementById("eventPhotosInput").value = "";
-  pendingPhotos = [];
-  renderPreview();
-  renderEvents();
-  
 
-  alert("活動已發布。");
+  // ==========================================
+  // 防止老師連續按很多次
+  // ==========================================
+
+  const saveButton = document.getElementById("saveEvent");
+
+  saveButton.disabled = true;
+  saveButton.textContent = "發布中...";
+
+
+  try {
+
+    // ========================================
+    // 把活動資料準備好
+    // ========================================
+
+    const activityData = {
+
+      // 活動名稱
+      name: name,
+
+      // 活動日期
+      date: date,
+
+      // 目前先把照片資料一起存進去
+      // 下一階段會改成 Firebase Storage 網址
+      photos: pendingPhotos.map(photo => ({
+        dataUrl: photo.dataUrl,
+        originalSize: photo.originalSize,
+        compressedSize: photo.compressedSize
+      })),
+
+      // Firebase 伺服器時間
+      createdAt: serverTimestamp()
+
+    };
+
+
+    // ========================================
+    // 寫入 Firestore
+    // activities 是我們建立的資料集合
+    // ========================================
+
+    const docRef = await addDoc(
+      collection(db, "activities"),
+      activityData
+    );
+
+
+    console.log(
+      "活動已成功寫入 Firestore：",
+      docRef.id
+    );
+
+
+    // ========================================
+    // 同時更新目前這台電腦的畫面
+    // ========================================
+
+    const localData = loadData();
+
+    localData.events.unshift({
+      id: docRef.id,
+      name: name,
+      date: date,
+      photos: [...pendingPhotos]
+    });
+
+    saveData(localData);
+
+
+    // ========================================
+    // 清空老師輸入內容
+    // ========================================
+
+    document.getElementById("eventName").value = "";
+
+    document.getElementById("eventDate").value = "";
+
+    document.getElementById("eventPhotosInput").value = "";
+
+    pendingPhotos = [];
+
+    renderPreview();
+
+    renderEvents();
+
+
+    alert("活動已成功發布！");
+
+
+  } catch (error) {
+
+    console.error(
+      "發布活動到 Firestore 失敗：",
+      error
+    );
+
+    alert(
+      "活動發布失敗，請稍後再試。\n\n" +
+      "錯誤：" + error.message
+    );
+
+
+  } finally {
+
+    // 恢復按鈕
+    saveButton.disabled = false;
+    saveButton.textContent = "確認發布活動";
+
+  }
+
 });
 
 // ---------- 12. 清除預覽 ----------
