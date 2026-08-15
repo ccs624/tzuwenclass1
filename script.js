@@ -1022,16 +1022,65 @@ function hideNormalContent() {
 // 返回班級活動
 // ==========================================
 
-document.getElementById("backToEvents").addEventListener("click", () => {
+const backToGallery =
+  document.getElementById("backToGallery");
 
-  showNormalContent();
+if (backToGallery) {
 
-  // 回到班級活動區
-  document.getElementById("photos").scrollIntoView({
-    behavior: "smooth"
-  });
+  backToGallery.addEventListener(
+    "click",
+    () => {
 
-});
+      const homeSection =
+        document.getElementById("home");
+
+      const scheduleSection =
+        document.getElementById("schedule");
+
+      const photosSection =
+        document.getElementById("photos");
+
+      const eventDetail =
+        document.getElementById("eventDetail");
+
+
+      // 顯示首頁
+      if (homeSection) {
+        homeSection.classList.remove("hidden");
+      }
+
+
+      // 顯示課表
+      if (scheduleSection) {
+        scheduleSection.classList.remove("hidden");
+      }
+
+
+      // 顯示班級照片
+      if (photosSection) {
+        photosSection.classList.remove("hidden");
+      }
+
+
+      // 隱藏活動詳細頁
+      if (eventDetail) {
+        eventDetail.classList.add("hidden");
+      }
+
+
+      // 回到班級照片
+      if (photosSection) {
+
+        photosSection.scrollIntoView({
+          behavior: "smooth"
+        });
+
+      }
+
+    }
+  );
+
+}
 
 
 // ==========================================
