@@ -490,50 +490,176 @@ const eventsRef = collection(db, "events");
 }
 
 
-function renderEvents() {
-  const data = loadData();
-  const list = document.getElementById("galleryList");
+// ==========================================================
+// 顯示班級活動
+//
+// 資料來源：Firebase Firestore
+//
+// 現在不再使用 localStorage 的活動照片。
+// 活動資料會從 events collection 讀取。
+// ==========================================================
 
-  if (!data.events.length) {
-    list.innerHTML = '<div class="empty-state"><div></div><p>目前還沒有活動照片。</p></div>';
+async function renderEvents() {
+
+  const list =
+    document.getElementById("galleryList");
+
+
+  // 如果找不到活動區域
+  if (!list) {
+    console.error("找不到 galleryList");
     return;
   }
 
-  list.innerHTML = data.events.map((event, eventIndex) => `
-    <article class="event-card">
-      <div class="event-header">
-        <div>
-          <h3>${escapeHtml(event.name)}</h3>
-          <div class="event-date">${formatDate(event.date)}</div>
-        </div>
-      </div>
-      <div class="photo-grid">
-      ${event.photos
-  .slice(0, 4)
-  .map((photo, photoIndex) => `
-    <div class="photo-item">
-      <img
-        src="${photo.dataUrl}"
-        alt="${escapeHtml(event.name)} 第${photoIndex + 1}張照片"
-      >
+
+  // 顯示讀取中的提示
+  list.innerHTML = `
+    <div class="empty-state">
+      <div>讀取中</div>
+      <p>正在載入班級活動照片……</p>
     </div>
-  `)
-  .join("")}
+  `;
+
+
+  try {
+
+    // ======================================================
+    // 從 Firestore 取得活動
+    // ======================================================
+
+    const events =
+      await loadEventsFromFirestore();
+
+
+    // ======================================================
+    // 沒有活動
+    // ======================================================
+
+    if (!events.length) {
+
+      list.innerHTML = `
+        <div class="empty-state">
+          <div></div>
+          <p>目前還沒有活動照片。</p>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    // ======================================================
+    // 產生活動列表
+    // ======================================================
+
+    list.innerHTML = events.map((event, eventIndex) => {
+
+      // ----------------------------------------------------
+      // 每個活動只在首頁顯示最多 3 張照片
+      // ----------------------------------------------------
+
+      const previewPhotos =
+        event.photos.slice(0, 3);
+
+
+      // ----------------------------------------------------
+      // 產生照片 HTML
+      // ----------------------------------------------------
+
+      const photosHTML =
+        previewPhotos.map((photo, photoIndex) => {
+
+          // 新版 Firebase 資料使用 photo.url
+          const photoURL =
+            photo.url || photo.dataUrl || "";
+
+
+          return `
+            <div class="photo-item">
+              <img
+                src="${photoURL}"
+                alt="${escapeHtml(event.name)} 第${photoIndex + 1}張照片"
+                loading="lazy"
+              >
+            </div>
+          `;
+
+        }).join("");
+
+
+      // ----------------------------------------------------
+      // 活動卡片
+      // ----------------------------------------------------
+
+      return `
+        <article class="event-card">
+
+          <div class="event-header">
+
+            <div>
+
+              <h3>
+                ${escapeHtml(event.name)}
+              </h3>
+
+              ${
+                event.date
+                  ? `<div class="event-date">
+                      ${formatDate(event.date)}
+                    </div>`
+                  : ""
+              }
+
+            </div>
+
+          </div>
+
+
+          <div class="photo-grid">
+            ${photosHTML}
+          </div>
+
+
+          ${
+            event.photos.length > 3
+              ? `
+                <div class="event-more">
+                  共 ${event.photos.length} 張照片
+                </div>
+              `
+              : ""
+          }
+
+
+        </article>
+      `;
+
+    }).join("");
+
+
+    console.log(
+      `活動畫面更新完成，共 ${events.length} 個活動`
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "顯示活動失敗：",
+      error
+    );
+
+
+    list.innerHTML = `
+      <div class="empty-state">
+        <div></div>
+        <p>活動照片讀取失敗，請稍後再試。</p>
       </div>
-  <div class="event-actions">
+    `;
 
-  <button
-    class="view-event-btn"
-    data-event-id="${event.id}"
-  >
-    查看全部照片
-  </button>
+  }
 
-</div>
-    </article>
-  `).join("");
 }
-
 // ==========================================
 // 活動詳細照片頁
 // ==========================================
