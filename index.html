@@ -65,32 +65,57 @@
       </div>
     </section>
 
-<!-- ==========================================
-     活動詳細照片區
-     預設隱藏，點擊「查看全部照片」後才會顯示
-     ========================================== -->
-<section id="eventDetail" class="event-detail hidden">
 
-  <div class="event-detail-inner">
+<!-- =====================================================
+     活動照片詳細頁
+     
+     平常會隱藏。
+     家長按下「查看全部照片」後才會顯示。
+     ===================================================== -->
 
-    <!-- 返回班級活動 -->
-    <button id="backToEvents" class="back-btn">
-      ← 返回班級活動
-    </button>
+<section
+  id="eventDetail"
+  class="section container hidden"
+>
 
-    <!-- 活動標題 -->
-    <div class="event-detail-header">
-      <span class="eyebrow">MEMORIES</span>
-      <h2 id="eventDetailTitle">活動名稱</h2>
+  <!-- 返回按鈕 -->
+  <button
+    id="backToGallery"
+    class="secondary-btn"
+    type="button"
+  >
+    ← 返回班級照片
+  </button>
+
+
+  <!-- 活動標題 -->
+  <div class="section-heading event-detail-heading">
+
+    <div>
+
+      <span
+        id="eventDetailEyebrow"
+        class="eyebrow"
+      >
+        CLASS EVENT
+      </span>
+
+      <h2 id="eventDetailTitle">
+        活動名稱
+      </h2>
+
       <p id="eventDetailDate"></p>
-    </div>
 
-    <!-- 活動所有照片 -->
-    <div id="eventDetailPhotos" class="event-detail-photos">
-      <!-- JavaScript 會把照片放在這裡 -->
     </div>
 
   </div>
+
+
+  <!-- 該活動的全部照片 -->
+  <div
+    id="eventDetailPhotos"
+    class="event-detail-grid"
+  ></div>
 
 </section>
     
