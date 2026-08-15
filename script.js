@@ -691,11 +691,7 @@ async function showEventDetail(eventId) {
     events.find(item => item.id === eventId);
 
 
-  // 找不到活動
-  if (!event) {
-
-    alert("找不到這個活動。");
-
+  
     return;
 
   }
