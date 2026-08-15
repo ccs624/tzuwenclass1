@@ -1145,7 +1145,7 @@ document.addEventListener("click", event => {
 // 返回班級活動
 // ==========================================
 
-document.getElementById("backToEvents").addEventListener("click", () => {
+document.getElementById("backToGallery").addEventListener("click", () => {
 
   // 隱藏活動詳細頁
   eventDetail.classList.add("hidden");
