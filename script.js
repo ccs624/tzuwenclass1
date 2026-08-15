@@ -336,10 +336,10 @@ async function uploadPhotoToStorage(
   // 建立照片在 Firebase Storage 裡面的路徑
   //
   // 例如：
-  // activities/1723456789/001.webp
+  // events/1723456789/001.webp
   //
   const storagePath =
-    "activities/" +
+    "events/" +
     Date.now() +
     "/" +
     fileName;
