@@ -660,6 +660,227 @@ async function renderEvents() {
   }
 
 }
+
+// ==========================================================
+// 顯示某一個活動的完整照片
+// ==========================================================
+
+async function showEventDetail(eventId) {
+
+  console.log(
+    "準備顯示活動：",
+    eventId
+  );
+
+
+  // 從 Firestore 重新取得最新活動
+  const events =
+    await loadEventsFromFirestore();
+
+
+  // 找到被點擊的活動
+  const event =
+    events.find(item => item.id === eventId);
+
+
+  // 找不到活動
+  if (!event) {
+
+    alert("找不到這個活動。");
+
+    return;
+
+  }
+
+
+  // ========================================================
+  // 找到網站上的主要區塊
+  // ========================================================
+
+  const homeSection =
+    document.getElementById("home");
+
+  const scheduleSection =
+    document.getElementById("schedule");
+
+  const photosSection =
+    document.getElementById("photos");
+
+  const eventDetail =
+    document.getElementById("eventDetail");
+
+
+  // ========================================================
+  // 隱藏首頁、課表、活動列表
+  // ========================================================
+
+  if (homeSection) {
+    homeSection.classList.add("hidden");
+  }
+
+  if (scheduleSection) {
+    scheduleSection.classList.add("hidden");
+  }
+
+  if (photosSection) {
+    photosSection.classList.add("hidden");
+  }
+
+
+  // 顯示活動詳細頁
+  eventDetail.classList.remove("hidden");
+
+
+  // ========================================================
+  // 填入活動資料
+  // ========================================================
+
+  document.getElementById(
+    "eventDetailTitle"
+  ).textContent = event.name;
+
+
+  document.getElementById(
+    "eventDetailDate"
+  ).textContent =
+    event.date
+      ? formatDate(event.date)
+      : "";
+
+
+  // ========================================================
+  // 顯示全部照片
+  // ========================================================
+
+  const photoBox =
+    document.getElementById(
+      "eventDetailPhotos"
+    );
+
+
+  photoBox.innerHTML =
+    event.photos
+      .map((photo, index) => {
+
+        const photoURL =
+          photo.url ||
+          photo.dataUrl ||
+          "";
+
+
+        return `
+          <div class="event-detail-photo">
+
+            <img
+              src="${photoURL}"
+              alt="${escapeHtml(event.name)} 第${index + 1}張照片"
+              loading="lazy"
+            >
+
+          </div>
+        `;
+
+      })
+      .join("");
+
+
+  // ========================================================
+  // 滾動到頁面最上方
+  // ========================================================
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+// ==========================================================
+// 「查看全部照片」按鈕
+// ==========================================================
+
+document.addEventListener(
+  "click",
+  event => {
+
+    const button =
+      event.target.closest(
+        ".view-event-btn"
+      );
+
+
+    // 如果點到的不是查看全部照片
+    if (!button) {
+      return;
+    }
+
+
+    const eventId =
+      button.dataset.eventId;
+
+
+    showEventDetail(eventId);
+
+  }
+);
+
+// ==========================================================
+// 返回班級照片
+// ==========================================================
+
+document
+  .getElementById("backToGallery")
+  .addEventListener(
+    "click",
+    () => {
+
+      const homeSection =
+        document.getElementById("home");
+
+      const scheduleSection =
+        document.getElementById("schedule");
+
+      const photosSection =
+        document.getElementById("photos");
+
+      const eventDetail =
+        document.getElementById("eventDetail");
+
+
+      // 顯示首頁
+      if (homeSection) {
+        homeSection.classList.remove("hidden");
+      }
+
+
+      // 顯示課表
+      if (scheduleSection) {
+        scheduleSection.classList.remove("hidden");
+      }
+
+
+      // 顯示班級照片
+      if (photosSection) {
+        photosSection.classList.remove("hidden");
+      }
+
+
+      // 隱藏活動詳細頁
+      eventDetail.classList.add("hidden");
+
+
+      // 回到班級照片區域
+      if (photosSection) {
+
+        photosSection.scrollIntoView({
+          behavior: "smooth"
+        });
+
+      }
+
+    }
+  );
+
 // ==========================================
 // 活動詳細照片頁
 // ==========================================
