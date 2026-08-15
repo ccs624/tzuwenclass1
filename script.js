@@ -631,6 +631,14 @@ async function renderEvents() {
           }
 
 
+
+<button
+  class="view-event-btn primary-btn"
+  type="button"
+  data-event-id="${event.id}"
+>
+  查看全部照片
+</button>
         </article>
       `;
 
