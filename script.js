@@ -559,7 +559,7 @@ async function renderEvents() {
       // ----------------------------------------------------
 
       const previewPhotos =
-        event.photos.slice(0, 3);
+        event.photos.slice(0, 4);
 
 
       // ----------------------------------------------------
