@@ -452,7 +452,7 @@ async function loadEventsFromFirestore() {
 const eventsRef = collection(db, "events");
 
     // 依照建立時間由新到舊排列
-    const q = query(
+ const q = query(
   eventsRef,
   orderBy("createdAt", "desc")
 );
