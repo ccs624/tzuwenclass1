@@ -690,11 +690,7 @@ async function showEventDetail(eventId) {
   const event =
     events.find(item => item.id === eventId);
 
-
-  
-    return;
-
-  }
+ 
 
 
   // ========================================================
