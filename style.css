@@ -620,3 +620,98 @@ footer {
   position: relative;
   z-index: 1;
 }
+
+
+/* ==========================================================
+   活動照片詳細頁
+   ========================================================== */
+
+/* 隱藏元素 */
+.hidden {
+  display: none !important;
+}
+
+
+/* 活動詳細頁的返回按鈕 */
+#backToGallery {
+  margin-bottom: 28px;
+}
+
+
+/* 活動詳細頁標題 */
+.event-detail-heading {
+  margin-bottom: 30px;
+}
+
+
+/* 活動日期 */
+#eventDetailDate {
+  margin-top: 8px;
+}
+
+
+/* ==========================================================
+   活動照片網格
+
+   使用原本照片的比例，不強制裁切。
+   ========================================================== */
+
+.event-detail-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 18px;
+
+  align-items: start;
+
+}
+
+
+/* 詳細頁照片 */
+.event-detail-grid img {
+
+  display: block;
+
+  width: 100%;
+
+  height: auto;
+
+  border-radius: 14px;
+
+  object-fit: contain;
+
+}
+
+
+/* ==========================================================
+   手機版
+   ========================================================== */
+
+@media (max-width: 768px) {
+
+  .event-detail-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .event-detail-grid {
+
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+
+  }
+
+}
