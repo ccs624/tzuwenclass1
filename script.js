@@ -901,10 +901,7 @@ function openEventDetail(eventId) {
     item => String(item.id) === String(eventId)
   );
 
-  if (!event) {
-    alert("找不到這個活動。");
-    return;
-  }
+ 
 
 
   // ==========================================
