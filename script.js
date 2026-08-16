@@ -2607,11 +2607,6 @@ document
 
 
 
-
-const eventId =
-  eventRef.id;
-
-
 console.log(
   "建立活動 ID：",
   eventId
