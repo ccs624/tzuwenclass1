@@ -25,7 +25,8 @@ import {
   query,
   serverTimestamp,
   setDoc,
-  getDoc
+  getDoc,
+  updateDoc
 } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -39,7 +40,8 @@ import {
   ref,
   uploadString,
   getDownloadURL,
-  deleteObject
+  deleteObject,
+  refFromURL
 } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
@@ -983,6 +985,289 @@ function renderPhotoManager() {
     }).join("");
 
 }
+
+// ==========================================================
+// 刪除活動中的單張照片
+//
+// 會做兩件事：
+//
+// 1. 刪除 Firebase Storage 裡的照片
+// 2. 更新 Firestore 裡的 photos 陣列
+//
+// ==========================================================
+
+async function deleteSinglePhoto(
+  eventId,
+  photo,
+  photoIndex
+) {
+
+  try {
+
+    console.log(
+      "準備刪除照片：",
+      photo
+    );
+
+
+    // ======================================================
+    // ① 先從 Firebase Storage 刪除照片
+    // ======================================================
+
+    /*
+      我們之前上傳照片時使用的路徑是：
+
+      events/時間戳記/檔名.webp
+
+      但是 Firestore 目前只保存 download URL。
+
+      因此這裡不能直接猜 Storage 路徑。
+
+      我們會從 download URL 裡取得實際 Storage 路徑。
+    */
+
+
+    if (photo.url) {
+
+      try {
+
+        // Firebase Storage 的 URL
+        // 轉換成 Storage Reference
+
+        const photoRef =
+          await refFromURL(
+            photo.url
+          );
+
+
+        await deleteObject(
+          photoRef
+        );
+
+
+        console.log(
+          "Storage 照片刪除成功"
+        );
+
+
+      } catch (storageError) {
+
+        console.warn(
+          "Storage 照片刪除失敗：",
+          storageError
+        );
+
+      }
+
+    }
+
+
+    // ======================================================
+    // ② 更新 Firestore
+    // ======================================================
+
+    const eventRef =
+      doc(
+        db,
+        "events",
+        eventId
+      );
+
+
+    // 建立新的照片陣列
+    const updatedPhotos =
+      [...(
+        currentManagingEvent.photos || []
+      )];
+
+
+    // 移除指定照片
+    updatedPhotos.splice(
+      photoIndex,
+      1
+    );
+
+
+    // 更新 Firestore
+    await updateDoc(
+      eventRef,
+      {
+        photos: updatedPhotos
+      }
+    );
+
+
+    console.log(
+      "Firestore 照片資料更新成功"
+    );
+
+
+    // ======================================================
+    // ③ 更新目前畫面
+    // ======================================================
+
+    currentManagingEvent.photos =
+      updatedPhotos;
+
+
+    renderPhotoManager();
+
+
+    // ======================================================
+    // ④ 更新老師活動列表
+    // ======================================================
+
+    await renderAdminEventList();
+
+
+    console.log(
+      "照片刪除完成！"
+    );
+
+
+    return true;
+
+
+  } catch (error) {
+
+    console.error(
+      "刪除單張照片失敗：",
+      error
+    );
+
+
+    return false;
+
+  }
+
+}
+
+// ==========================================================
+// 照片管理視窗：刪除照片按鈕
+// ==========================================================
+
+document
+  .getElementById(
+    "photoManagerGrid"
+  )
+  ?.addEventListener(
+    "click",
+    async event => {
+
+
+      // 找到刪除照片按鈕
+      const deleteButton =
+        event.target.closest(
+          "[data-delete-photo]"
+        );
+
+
+      if (!deleteButton) {
+        return;
+      }
+
+
+      // 取得照片編號
+      const photoIndex =
+        Number(
+          deleteButton.dataset
+            .deletePhoto
+        );
+
+
+      // 確認目前有活動
+      if (!currentManagingEvent) {
+
+        alert(
+          "目前沒有正在管理的活動。"
+        );
+
+        return;
+
+      }
+
+
+      const photos =
+        currentManagingEvent.photos || [];
+
+
+      const photo =
+        photos[photoIndex];
+
+
+      if (!photo) {
+
+        alert(
+          "找不到這張照片。"
+        );
+
+        return;
+
+      }
+
+
+      // ====================================================
+      // 確認刪除
+      // ====================================================
+
+      const confirmed =
+        confirm(
+          `確定要刪除第 ${
+            photoIndex + 1
+          } 張照片嗎？\n\n` +
+          `刪除後無法復原。`
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      // 防止重複點擊
+      deleteButton.disabled =
+        true;
+
+      deleteButton.textContent =
+        "刪除中…";
+
+
+      // ====================================================
+      // 執行刪除
+      // ====================================================
+
+      const success =
+        await deleteSinglePhoto(
+          currentManagingEvent.id,
+          photo,
+          photoIndex
+        );
+
+
+      if (!success) {
+
+        alert(
+          "照片刪除失敗，請查看 Console。"
+        );
+
+        deleteButton.disabled =
+          false;
+
+        deleteButton.textContent =
+          "刪除";
+
+        return;
+
+      }
+
+
+      alert(
+        "照片已成功刪除。"
+      );
+
+    }
+  );
+
 
 // ==========================================================
 // 關閉照片管理視窗
