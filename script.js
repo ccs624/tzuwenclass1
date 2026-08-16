@@ -1255,39 +1255,338 @@ document.getElementById("saveSchedule").addEventListener("click", async () => {
   }
 });
 
-// ---------- 10. 活動照片預覽 ----------
+// ==========================================================
+// 10. 活動照片預覽
+//
+// pendingPhotos：
+// 代表「目前還沒有發布」的照片。
+//
+// 這些照片只存在瀏覽器記憶體裡。
+// 老師按下「確認發布活動」以前，
+// 不會正式上傳 Firebase。
+// ==========================================================
+
 let pendingPhotos = [];
 
-document.getElementById("eventPhotosInput").addEventListener("change", async e => {
-  pendingPhotos = [];
 
-  for (const file of e.target.files) {
-    try {
-      const result = await compressImage(file);
-      pendingPhotos.push({
-        dataUrl: result.dataUrl,
-        originalSize: result.originalSize,
-        compressedSize: result.compressedSize
-      });
-    } catch {
-      alert(`「${file.name}」處理失敗。`);
+// ==========================================================
+// 選擇照片
+// ==========================================================
+
+document
+  .getElementById("eventPhotosInput")
+  .addEventListener("change", async e => {
+
+    const files = Array.from(e.target.files);
+
+
+    // 沒有選照片
+    if (!files.length) {
+      return;
     }
-  }
 
-  renderPreview();
-});
+
+    // 新選擇照片加入目前預覽
+    for (const file of files) {
+
+      try {
+
+        const result =
+          await compressImage(file);
+
+
+        pendingPhotos.push({
+
+          // 壓縮後的照片
+          dataUrl: result.dataUrl,
+
+          // 原始檔案大小
+          originalSize: result.originalSize,
+
+          // 壓縮後大小
+          compressedSize: result.compressedSize,
+
+          // 原本檔案名稱
+          fileName: file.name
+
+        });
+
+
+      } catch (error) {
+
+        console.error(
+          "照片處理失敗：",
+          error
+        );
+
+        alert(
+          `「${file.name}」處理失敗。`
+        );
+
+      }
+
+    }
+
+
+    // 顯示預覽
+    renderPreview();
+
+
+    // 清空 input
+    //
+    // 這樣老師之後重新選同一批照片，
+    // change 事件也能再次觸發。
+    e.target.value = "";
+
+  });
+
+
+// ==========================================================
+// 顯示照片預覽
+// ==========================================================
 
 function renderPreview() {
-  const box = document.getElementById("photoPreview");
 
-  box.innerHTML = pendingPhotos.map((photo, index) => `
-    <div class="preview-item" title="第 ${index + 1} 張">
-      <img src="${photo.dataUrl}" alt="預覽照片">
-      <span>${index + 1}</span>
-    </div>
-  `).join("");
+  const box =
+    document.getElementById("photoPreview");
+
+
+  // 沒有照片
+  if (!pendingPhotos.length) {
+
+    box.innerHTML = `
+      <div class="preview-hint">
+        選擇照片後會在這裡顯示預覽。
+      </div>
+    `;
+
+    return;
+  }
+
+
+  // ========================================================
+  // 產生照片
+  // ========================================================
+
+  box.innerHTML =
+    pendingPhotos
+      .map((photo, index) => {
+
+        return `
+
+          <div
+            class="preview-item"
+            draggable="true"
+            data-index="${index}"
+          >
+
+            <!-- 照片編號 -->
+            <span class="preview-number">
+              ${index + 1}
+            </span>
+
+
+            <!-- 刪除按鈕 -->
+            <button
+              type="button"
+              class="preview-delete"
+              data-delete-index="${index}"
+              title="刪除這張照片"
+            >
+              
+            </button>
+
+
+            <!-- 照片 -->
+            <img
+              src="${photo.dataUrl}"
+              alt="照片 ${index + 1}"
+            >
+
+          </div>
+
+        `;
+
+      })
+      .join("");
+
+
+  // 啟用拖曳排序
+  enablePhotoDragAndDrop();
+
 }
 
+
+// ==========================================================
+// 刪除照片
+// ==========================================================
+
+document
+  .getElementById("photoPreview")
+  .addEventListener(
+    "click",
+    event => {
+
+      const deleteButton =
+        event.target.closest(
+          ".preview-delete"
+        );
+
+
+      // 點的不是刪除按鈕
+      if (!deleteButton) {
+        return;
+      }
+
+
+      const index =
+        Number(
+          deleteButton.dataset.deleteIndex
+        );
+
+
+      // 從預覽陣列刪除
+      pendingPhotos.splice(
+        index,
+        1
+      );
+
+
+      // 重新顯示預覽
+      renderPreview();
+
+    }
+  );
+
+
+// ==========================================================
+// 拖曳排序
+// ==========================================================
+
+function enablePhotoDragAndDrop() {
+
+  const items =
+    document.querySelectorAll(
+      ".preview-item"
+    );
+
+
+  let draggedIndex = null;
+
+
+  items.forEach(item => {
+
+
+    // ------------------------------------------------------
+    // 開始拖曳
+    // ------------------------------------------------------
+
+    item.addEventListener(
+      "dragstart",
+      () => {
+
+        draggedIndex =
+          Number(
+            item.dataset.index
+          );
+
+
+        item.classList.add(
+          "dragging"
+        );
+
+      }
+    );
+
+
+    // ------------------------------------------------------
+    // 結束拖曳
+    // ------------------------------------------------------
+
+    item.addEventListener(
+      "dragend",
+      () => {
+
+        item.classList.remove(
+          "dragging"
+        );
+
+        draggedIndex = null;
+
+      }
+    );
+
+
+    // ------------------------------------------------------
+    // 拖曳經過另一張照片
+    // ------------------------------------------------------
+
+    item.addEventListener(
+      "dragover",
+      event => {
+
+        event.preventDefault();
+
+      }
+    );
+
+
+    // ------------------------------------------------------
+    // 放下照片
+    // ------------------------------------------------------
+
+    item.addEventListener(
+      "drop",
+      event => {
+
+        event.preventDefault();
+
+
+        const targetIndex =
+          Number(
+            item.dataset.index
+          );
+
+
+        // 沒有拖曳來源
+        if (draggedIndex === null) {
+          return;
+        }
+
+
+        // 自己拖到自己
+        if (
+          draggedIndex === targetIndex
+        ) {
+          return;
+        }
+
+
+        // 取出被拖曳的照片
+        const movedPhoto =
+          pendingPhotos.splice(
+            draggedIndex,
+            1
+          )[0];
+
+
+        // 插入新的位置
+        pendingPhotos.splice(
+          targetIndex,
+          0,
+          movedPhoto
+        );
+
+
+        // 重新繪製
+        renderPreview();
+
+      }
+    );
+
+  });
+
+}
 
 // ==========================================================
 // 發布活動
