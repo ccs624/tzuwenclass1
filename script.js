@@ -38,7 +38,6 @@ import {
 import {
   getStorage,
   ref,
-  refFromURL,
   uploadString,
   getDownloadURL,
   deleteObject
@@ -1009,59 +1008,7 @@ async function deleteSinglePhoto(
 
 
     // ======================================================
-    // ① 先從 Firebase Storage 刪除照片
-    // ======================================================
-
-    /*
-      我們之前上傳照片時使用的路徑是：
-
-      events/時間戳記/檔名.webp
-
-      但是 Firestore 目前只保存 download URL。
-
-      因此這裡不能直接猜 Storage 路徑。
-
-      我們會從 download URL 裡取得實際 Storage 路徑。
-    */
-
-
-    if (photo.url) {
-
-      try {
-
-        // Firebase Storage 的 URL
-        // 轉換成 Storage Reference
-
-        const photoRef =
-          await refFromURL(
-            photo.url
-          );
-
-
-        await deleteObject(
-          photoRef
-        );
-
-
-        console.log(
-          "Storage 照片刪除成功"
-        );
-
-
-      } catch (storageError) {
-
-        console.warn(
-          "Storage 照片刪除失敗：",
-          storageError
-        );
-
-      }
-
-    }
-
-
-    // ======================================================
-    // ② 更新 Firestore
+    // ① 更新 Firestore 的照片清單
     // ======================================================
 
     const eventRef =
@@ -1072,11 +1019,11 @@ async function deleteSinglePhoto(
       );
 
 
-    // 建立新的照片陣列
+    // 複製目前照片陣列
     const updatedPhotos =
-      [...(
-        currentManagingEvent.photos || []
-      )];
+      [
+        ...(currentManagingEvent.photos || [])
+      ];
 
 
     // 移除指定照片
@@ -1101,7 +1048,7 @@ async function deleteSinglePhoto(
 
 
     // ======================================================
-    // ③ 更新目前畫面
+    // ② 更新目前畫面
     // ======================================================
 
     currentManagingEvent.photos =
@@ -1111,15 +1058,12 @@ async function deleteSinglePhoto(
     renderPhotoManager();
 
 
-    // ======================================================
-    // ④ 更新老師活動列表
-    // ======================================================
-
+    // 更新老師活動列表
     await renderAdminEventList();
 
 
     console.log(
-      "照片刪除完成！"
+      "照片已從網站活動中移除！"
     );
 
 
