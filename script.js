@@ -23,7 +23,8 @@ import {
   doc,
   orderBy,
   query,
-  serverTimestamp
+  serverTimestamp,
+  setDoc
 } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -330,25 +331,38 @@ function compressImage(file, maxWidth = 1600, quality = 0.85) {
 
 async function uploadPhotoToStorage(
   dataUrl,
-  fileName
+  fileName,
+  eventId
 ) {
 
+  // ======================================================
   // 建立照片在 Firebase Storage 裡面的路徑
   //
-  // 例如：
-  // events/1723456789/001.webp
+  // 每個活動都有自己的資料夾
   //
+  // 例如：
+  //
+  // events/
+  //   abc123/
+  //      1.webp
+  //      2.webp
+  //      3.webp
+  //
+  // ======================================================
+
   const storagePath =
     "events/" +
-    Date.now() +
+    eventId +
     "/" +
     fileName;
+
 
   // 建立 Storage 參照
   const storageRef = ref(
     storage,
     storagePath
   );
+
 
   // 把 Data URL 上傳到 Storage
   await uploadString(
@@ -360,14 +374,17 @@ async function uploadPhotoToStorage(
     }
   );
 
-  // 取得照片可以公開讀取的網址
+
+  // 取得照片網址
   const downloadURL =
     await getDownloadURL(storageRef);
+
 
   console.log(
     "照片上傳成功：",
     downloadURL
   );
+
 
   return downloadURL;
 }
@@ -1586,190 +1603,343 @@ function enablePhotoDragAndDrop() {
 
 }
 
+
 // ==========================================================
 // 發布活動
 //
 // 流程：
-// 1. 取得活動名稱、日期
-// 2. 將每張照片上傳到 Firebase Storage
-// 3. 取得每張照片的網址
-// 4. 將活動資料與照片網址存入 Firestore
-// 5. 清除目前的預覽
+//
+// 1. 老師填寫活動名稱、日期
+// 2. 確認預覽照片
+// 3. 先建立一個活動 ID
+// 4. 照片上傳到 Firebase Storage
+// 5. 照片網址存入 Firestore
+// 6. 活動正式發布
 // ==========================================================
 
-document.getElementById("saveEvent").addEventListener("click", async () => {
-
-  const name =
-    document.getElementById("eventName").value.trim();
-
-  const date =
-    document.getElementById("eventDate").value;
-
-
-  // ---------- 基本檢查 ----------
-
-  if (!name) {
-    alert("請輸入活動名稱。");
-    return;
-  }
-
-  if (!pendingPhotos.length) {
-    alert("請選擇至少一張照片。");
-    return;
-  }
-
-
-  // ---------- 防止老師重複按按鈕 ----------
-
-  const button =
-    document.getElementById("saveEvent");
-
-  button.disabled = true;
-  button.textContent = "照片上傳中，請稍候…";
-
-
-  try {
-
-    console.log(
-      `開始上傳活動「${name}」，共 ${pendingPhotos.length} 張照片`
-    );
+document
+  .getElementById("saveEvent")
+  .addEventListener("click", async () => {
 
 
     // ======================================================
-    // 逐張上傳照片到 Firebase Storage
+    // 取得表單資料
     // ======================================================
 
-    const uploadedPhotos = [];
+    const name =
+      document
+        .getElementById("eventName")
+        .value
+        .trim();
 
 
-    for (let i = 0; i < pendingPhotos.length; i++) {
+    const date =
+      document
+        .getElementById("eventDate")
+        .value;
 
-      const photo = pendingPhotos[i];
 
-      console.log(
-        `正在上傳第 ${i + 1} / ${pendingPhotos.length} 張照片`
+    // ======================================================
+    // 基本檢查
+    // ======================================================
+
+    if (!name) {
+
+      alert(
+        "請輸入活動名稱。"
       );
 
-
-      // 建立照片檔名
-      const fileName =
-        `${Date.now()}-${i + 1}.webp`;
-
-
-      // 上傳到 Firebase Storage
-      const downloadURL =
-        await uploadPhotoToStorage(
-          photo.dataUrl,
-          fileName
-        );
-
-
-      // 只把網址存下來
-      uploadedPhotos.push({
-        url: downloadURL,
-        order: i + 1
-      });
-
+      return;
     }
 
 
-    console.log(
-      "所有照片上傳完成！",
-      uploadedPhotos
-    );
+    if (!pendingPhotos.length) {
+
+      alert(
+        "請選擇至少一張照片。"
+      );
+
+      return;
+    }
 
 
     // ======================================================
-    // 將活動資料存入 Firestore
+    // 防止老師重複按按鈕
     // ======================================================
 
-    const eventData = {
-
-      // 活動名稱
-      name: name,
-
-      // 活動日期
-      date: date,
-
-      // 建立時間
-      createdAt: serverTimestamp(),
-
-      // 照片
-      photos: uploadedPhotos
-
-    };
+    const button =
+      document.getElementById(
+        "saveEvent"
+      );
 
 
-    // 新增活動到 Firestore
-    const docRef =
-      await addDoc(
-        collection(db, "events"),
+    button.disabled = true;
+
+    button.textContent =
+      "建立活動中，請稍候…";
+
+
+    try {
+
+
+      console.log(
+        `開始建立活動「${name}」`
+      );
+
+
+      // ====================================================
+      // ① 先建立活動 ID
+      //
+      // 這裡不需要先寫資料到 Firestore。
+      // 只是先取得一個唯一 ID。
+      // ====================================================
+
+      const eventRef =
+        doc(
+          collection(
+            db,
+            "events"
+          )
+        );
+
+
+      const eventId =
+        eventRef.id;
+
+
+      console.log(
+        "活動 ID：",
+        eventId
+      );
+
+
+      // ====================================================
+      // ② 開始上傳照片
+      // ====================================================
+
+      button.textContent =
+        "照片上傳中，請稍候…";
+
+
+      const uploadedPhotos = [];
+
+
+      for (
+        let i = 0;
+        i < pendingPhotos.length;
+        i++
+      ) {
+
+
+        const photo =
+          pendingPhotos[i];
+
+
+        console.log(
+          `正在上傳第 ${
+            i + 1
+          } / ${
+            pendingPhotos.length
+          } 張照片`
+        );
+
+
+        // -----------------------------------------------
+        // 照片檔名
+        //
+        // 直接使用排序後的編號
+        //
+        // 1.webp
+        // 2.webp
+        // 3.webp
+        // -----------------------------------------------
+
+        const fileName =
+          `${String(
+            i + 1
+          ).padStart(3, "0")}.webp`;
+
+
+        // -----------------------------------------------
+        // 上傳到 Storage
+        // -----------------------------------------------
+
+        const downloadURL =
+          await uploadPhotoToStorage(
+            photo.dataUrl,
+            fileName,
+            eventId
+          );
+
+
+        // -----------------------------------------------
+        // 儲存照片資訊
+        // -----------------------------------------------
+
+        uploadedPhotos.push({
+
+          url:
+            downloadURL,
+
+          order:
+            i + 1
+
+        });
+
+      }
+
+
+      console.log(
+        "所有照片上傳完成！",
+        uploadedPhotos
+      );
+
+
+      // ====================================================
+      // ③ 建立 Firestore 活動資料
+      // ====================================================
+
+      const eventData = {
+
+        // 活動名稱
+        name:
+          name,
+
+
+        // 活動日期
+        date:
+          date,
+
+
+        // 建立時間
+        createdAt:
+          serverTimestamp(),
+
+
+        // Storage 資料夾 ID
+        storageFolder:
+          eventId,
+
+
+        // 照片
+        photos:
+          uploadedPhotos
+
+      };
+
+
+      // ====================================================
+      // ④ 將活動寫入 Firestore
+      // ====================================================
+
+      await setDoc(
+        eventRef,
         eventData
       );
 
 
-    console.log(
-      "活動已成功儲存到 Firestore：",
-      docRef.id
-    );
-
-
-    // ======================================================
-    // 清除表單
-    // ======================================================
-
-    document.getElementById("eventName").value = "";
-
-    document.getElementById("eventDate").value = "";
-
-    document.getElementById("eventPhotosInput").value = "";
-
-    pendingPhotos = [];
-
-    renderPreview();
-
-
-    // 重新讀取 Firestore 的活動
-    if (typeof loadEventsFromFirestore === "function") {
-
-      const events =
-        await loadEventsFromFirestore();
-
       console.log(
-        `目前共有 ${events.length} 個活動`
+        "活動已成功儲存到 Firestore：",
+        eventId
       );
+
+
+      // ====================================================
+      // ⑤ 清除表單
+      // ====================================================
+
+      document
+        .getElementById(
+          "eventName"
+        )
+        .value = "";
+
+
+      document
+        .getElementById(
+          "eventDate"
+        )
+        .value = "";
+
+
+      document
+        .getElementById(
+          "eventPhotosInput"
+        )
+        .value = "";
+
+
+      pendingPhotos = [];
+
+
+      renderPreview();
+
+
+      // ====================================================
+      // ⑥ 重新讀取活動
+      // ====================================================
+
+      if (
+        typeof loadEventsFromFirestore ===
+        "function"
+      ) {
+
+        const events =
+          await loadEventsFromFirestore();
+
+
+        console.log(
+          `目前共有 ${events.length} 個活動`
+        );
+
+      }
+
+
+      // ====================================================
+      // ⑦ 成功提示
+      // ====================================================
+
+      alert(
+        `活動「${name}」已成功發布！\n\n` +
+        `共上傳 ${uploadedPhotos.length} 張照片。`
+      );
+
+
+    } catch (error) {
+
+
+      // ====================================================
+      // 發生錯誤
+      // ====================================================
+
+      console.error(
+        "活動發布失敗：",
+        error
+      );
+
+
+      alert(
+        "活動發布失敗，請查看 Console 的錯誤訊息。"
+      );
+
+
+    } finally {
+
+
+      // ====================================================
+      // 恢復按鈕
+      // ====================================================
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "確認發布活動";
 
     }
 
-
-    alert(
-      `活動「${name}」已成功發布！\n\n共上傳 ${uploadedPhotos.length} 張照片。`
-    );
-
-
-  } catch (error) {
-
-    console.error(
-      "活動發布失敗：",
-      error
-    );
-
-
-    alert(
-      "活動發布失敗，請查看 Console 的錯誤訊息。"
-    );
-
-
-  } finally {
-
-    // 恢復按鈕
-    button.disabled = false;
-
-    button.textContent = "確認發布活動";
-
-  }
-
-});
+  });
 
 
 
