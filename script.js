@@ -1872,60 +1872,7 @@ modal.addEventListener("click", e => {
   if (e.target === modal) modal.classList.add("hidden");
 });
 
-<!-- =====================================================
-     老師：照片管理視窗
-     ===================================================== -->
 
-<div id="photoManagerModal" class="photo-manager-modal hidden">
-
-  <div class="photo-manager-content">
-
-    <div class="photo-manager-header">
-
-      <div>
-        <span class="eyebrow">PHOTO MANAGER</span>
-
-        <h3 id="photoManagerTitle">
-          活動照片
-        </h3>
-
-      </div>
-
-      <button
-        type="button"
-        id="closePhotoManager"
-        class="modal-close"
-      >
-        ×
-      </button>
-
-    </div>
-
-
-    <!-- 照片會放在這裡 -->
-
-    <div
-      id="photoManagerGrid"
-      class="photo-manager-grid"
-    >
-    </div>
-
-
-    <div class="photo-manager-footer">
-
-      <button
-        type="button"
-        id="closePhotoManagerBottom"
-        class="secondary-btn"
-      >
-        關閉
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
 
 // ---------- 8. 首頁照片 ----------
 document.getElementById("saveHomePhotos").addEventListener("click", async () => {
