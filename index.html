@@ -125,7 +125,7 @@
     <p id="footerTitle">慈文國小一年一班 · 班級網頁</p>
   </footer>
 
-  <!-- 老師管理面板：第一階段使用瀏覽器本機儲存示範，之後再接 Firebase。 -->
+  
  <div id="adminModal" class="modal hidden">
 
   <div class="admin-panel">
@@ -209,6 +209,61 @@
         </button>
       </div>
 
+
+      <!-- =====================================================
+     老師：照片管理視窗
+     ===================================================== -->
+
+<div id="photoManagerModal" class="photo-manager-modal hidden">
+
+  <div class="photo-manager-content">
+
+    <div class="photo-manager-header">
+
+      <div>
+        <span class="eyebrow">PHOTO MANAGER</span>
+
+        <h3 id="photoManagerTitle">
+          活動照片
+        </h3>
+
+      </div>
+
+      <button
+        type="button"
+        id="closePhotoManager"
+        class="modal-close"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- 照片會放在這裡 -->
+
+    <div
+      id="photoManagerGrid"
+      class="photo-manager-grid"
+    >
+    </div>
+
+
+    <div class="photo-manager-footer">
+
+      <button
+        type="button"
+        id="closePhotoManagerBottom"
+        class="secondary-btn"
+      >
+        關閉
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
       <!-- 首頁照片 -->
 
