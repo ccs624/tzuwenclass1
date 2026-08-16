@@ -129,6 +129,8 @@ onAuthStateChanged(auth, (user) => {
 
     teacherEmail.textContent = user.email;
 
+    renderAdminEventList();
+
   } else {
 
     // 尚未登入
@@ -508,6 +510,296 @@ const eventsRef = collection(db, "events");
 
 }
 
+
+// ==========================================================
+// 老師管理：顯示已發布活動
+// ==========================================================
+
+async function renderAdminEventList() {
+
+  const list =
+    document.getElementById(
+      "adminEventList"
+    );
+
+
+  // 如果目前頁面沒有老師管理區，
+  // 就不用執行。
+  if (!list) {
+    return;
+  }
+
+
+  // 顯示讀取中
+  list.innerHTML = `
+    <div class="empty-state">
+      正在讀取活動資料……
+    </div>
+  `;
+
+
+  try {
+
+    // 從 Firebase 取得活動
+    const events =
+      await loadEventsFromFirestore();
+
+
+    // 沒有活動
+    if (!events.length) {
+
+      list.innerHTML = `
+        <div class="empty-state">
+          目前還沒有已發布的活動。
+        </div>
+      `;
+
+      return;
+    }
+
+
+    // ======================================================
+    // 產生活動列表
+    // ======================================================
+
+    list.innerHTML =
+      events.map(event => {
+
+        const photoCount =
+          event.photos
+            ? event.photos.length
+            : 0;
+
+
+        return `
+
+          <div
+            class="admin-event-item"
+            data-event-id="${event.id}"
+          >
+
+            <div class="admin-event-info">
+
+              <h4>
+                ${escapeHtml(event.name)}
+              </h4>
+
+              <div class="admin-event-meta">
+
+                ${
+                  event.date
+                    ? formatDate(event.date)
+                    : "未設定日期"
+                }
+
+                ・
+
+                ${photoCount} 張照片
+
+              </div>
+
+            </div>
+
+
+            <div class="admin-event-actions">
+
+              <button
+                type="button"
+                class="admin-delete-btn"
+                data-admin-delete-event="${event.id}"
+              >
+                刪除活動
+              </button>
+
+            </div>
+
+          </div>
+
+        `;
+
+      }).join("");
+
+
+  } catch (error) {
+
+    console.error(
+      "讀取老師活動列表失敗：",
+      error
+    );
+
+
+    list.innerHTML = `
+      <div class="empty-state">
+        活動資料讀取失敗。
+      </div>
+    `;
+
+  }
+
+}
+
+// ==========================================================
+// 老師管理：刪除活動
+// ==========================================================
+
+document
+  .getElementById("adminEventList")
+  ?.addEventListener(
+    "click",
+    async event => {
+
+
+      // 找到刪除按鈕
+      const deleteButton =
+        event.target.closest(
+          "[data-admin-delete-event]"
+        );
+
+
+      // 點到其他地方
+      if (!deleteButton) {
+        return;
+      }
+
+
+      const eventId =
+        deleteButton.dataset
+          .adminDeleteEvent;
+
+
+      // ====================================================
+      // 從 Firestore 找到活動
+      // ====================================================
+
+      try {
+
+        const eventRef =
+          doc(
+            db,
+            "events",
+            eventId
+          );
+
+
+        const eventSnapshot =
+          await getDoc(
+            eventRef
+          );
+
+
+        if (!eventSnapshot.exists()) {
+
+          alert(
+            "找不到這個活動，可能已經被刪除。"
+          );
+
+          await renderAdminEventList();
+
+          return;
+        }
+
+
+        const eventData =
+          eventSnapshot.data();
+
+
+        // ==================================================
+        // 確認刪除
+        // ==================================================
+
+        const confirmed =
+          confirm(
+            `確定要刪除「${eventData.name}」嗎？\n\n` +
+            `這個活動共有 ${
+              (eventData.photos || []).length
+            } 張照片。\n\n` +
+            `活動和照片都會永久刪除，無法復原。`
+          );
+
+
+        if (!confirmed) {
+          return;
+        }
+
+
+        // ==================================================
+        // 防止重複點擊
+        // ==================================================
+
+        deleteButton.disabled =
+          true;
+
+        deleteButton.textContent =
+          "刪除中…";
+
+
+        // ==================================================
+        // 刪除 Firebase Storage + Firestore
+        // ==================================================
+
+        const success =
+          await deleteEventFromFirebase(
+            eventId,
+            eventData
+          );
+
+
+        if (!success) {
+
+          alert(
+            "刪除失敗，請查看 Console。"
+          );
+
+          deleteButton.disabled =
+            false;
+
+          deleteButton.textContent =
+            "刪除活動";
+
+          return;
+        }
+
+
+        // ==================================================
+        // 成功
+        // ==================================================
+
+        alert(
+          `活動「${eventData.name}」已刪除。`
+        );
+
+
+        // 重新整理老師活動列表
+        await renderAdminEventList();
+
+
+        // 同時重新整理網站前台活動
+        if (
+          typeof loadEventsFromFirestore ===
+          "function"
+        ) {
+
+          await loadEventsFromFirestore();
+
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "刪除活動失敗：",
+          error
+        );
+
+
+        alert(
+          "刪除活動失敗，請查看 Console。"
+        );
+
+      }
+
+    }
+  );
 
 // ==========================================================
 // 刪除整個活動
