@@ -273,57 +273,93 @@
           >
         </label>
 
-        <label>
-          活動日期
+<!-- =====================================================
+     新增活動
+     ===================================================== -->
 
-          <input
-            id="eventDate"
-            type="date"
-          >
-        </label>
+<div class="admin-block">
 
-        <label>
-          選擇照片
+  <h3>新增活動</h3>
 
-          <input
-            id="eventPhotosInput"
-            type="file"
-            accept="image/*"
-            multiple
-          >
-        </label>
 
-        <p class="hint">
-          照片會在上傳前自動縮小、轉成 WebP，並保留比例。
-        </p>
+  <!-- 活動名稱 -->
+  <label>
+    活動名稱
 
-        <div
-          id="photoPreview"
-          class="preview-grid"
-        ></div>
+    <input
+      id="eventName"
+      type="text"
+      placeholder="例如：校外教學"
+    >
+  </label>
 
-        <div class="preview-actions">
 
-          <button
-            id="clearPreview"
-            class="secondary-btn"
-            type="button"
-          >
-            清除預覽
-          </button>
+  <!-- 活動日期 -->
+  <label>
+    活動日期
 
-          <button
-            id="saveEvent"
-            class="primary-btn"
-            type="button"
-          >
-            確認發布活動
-          </button>
+    <input
+      id="eventDate"
+      type="date"
+    >
+  </label>
 
-        </div>
 
-      </div>
+  <!-- 選擇照片 -->
+  <label>
+    選擇照片
 
+    <input
+      id="eventPhotosInput"
+      type="file"
+      accept="image/*"
+      multiple
+    >
+  </label>
+
+
+  <p class="hint">
+    照片會在發布前自動縮小並轉成 WebP。
+    可以拖曳照片調整順序，也可以刪除不要的照片。
+  </p>
+
+
+  <!-- =================================================
+       照片預覽區
+       ================================================= -->
+
+  <div
+    id="photoPreview"
+    class="preview-grid"
+  ></div>
+
+
+  <!-- =================================================
+       預覽操作
+       ================================================= -->
+
+  <div class="preview-actions">
+
+    <button
+      id="clearPreview"
+      class="secondary-btn"
+      type="button"
+    >
+      清除全部照片
+    </button>
+
+
+    <button
+      id="saveEvent"
+      class="primary-btn"
+      type="button"
+    >
+      確認發布活動
+    </button>
+
+  </div>
+
+</div>
 
       <!-- 第一階段資料 -->
 
