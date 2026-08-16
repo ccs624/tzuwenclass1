@@ -603,14 +603,23 @@ async function renderAdminEventList() {
 
             <div class="admin-event-actions">
 
-              <button
-                type="button"
-                class="admin-delete-btn"
-                data-admin-delete-event="${event.id}"
-              >
-                刪除活動
-              </button>
+  <button
+    type="button"
+    class="secondary-btn"
+    data-admin-manage-event="${event.id}"
+  >
+    管理照片
+  </button>
 
+  <button
+    type="button"
+    class="admin-delete-btn"
+    data-admin-delete-event="${event.id}"
+  >
+    刪除活動
+  </button>
+
+</div>
             </div>
 
           </div>
@@ -799,6 +808,218 @@ document
       }
 
     }
+  );
+
+// ==========================================================
+// 老師管理：開啟照片管理視窗
+// ==========================================================
+
+let currentManagingEvent = null;
+
+
+document
+  .getElementById("adminEventList")
+  ?.addEventListener(
+    "click",
+    async event => {
+
+      const manageButton =
+        event.target.closest(
+          "[data-admin-manage-event]"
+        );
+
+
+      if (!manageButton) {
+        return;
+      }
+
+
+      const eventId =
+        manageButton.dataset
+          .adminManageEvent;
+
+
+      try {
+
+        // 從 Firestore 取得活動
+        const eventRef =
+          doc(
+            db,
+            "events",
+            eventId
+          );
+
+
+        const eventSnapshot =
+          await getDoc(eventRef);
+
+
+        if (!eventSnapshot.exists()) {
+
+          alert(
+            "找不到這個活動。"
+          );
+
+          return;
+        }
+
+
+        // 儲存目前正在管理的活動
+        currentManagingEvent = {
+
+          id: eventSnapshot.id,
+
+          ...eventSnapshot.data()
+
+        };
+
+
+        // 設定標題
+        document
+          .getElementById(
+            "photoManagerTitle"
+          )
+          .textContent =
+            currentManagingEvent.name;
+
+
+        // 顯示照片
+        renderPhotoManager();
+
+
+        // 開啟視窗
+        document
+          .getElementById(
+            "photoManagerModal"
+          )
+          .classList
+          .remove("hidden");
+
+
+      } catch (error) {
+
+        console.error(
+          "開啟照片管理失敗：",
+          error
+        );
+
+
+        alert(
+          "照片管理開啟失敗，請查看 Console。"
+        );
+
+      }
+
+    }
+  );
+
+// ==========================================================
+// 顯示目前活動的照片
+// ==========================================================
+
+function renderPhotoManager() {
+
+  const grid =
+    document.getElementById(
+      "photoManagerGrid"
+    );
+
+
+  if (!currentManagingEvent) {
+
+    grid.innerHTML = "";
+
+    return;
+
+  }
+
+
+  const photos =
+    currentManagingEvent.photos || [];
+
+
+  // 沒有照片
+  if (!photos.length) {
+
+    grid.innerHTML = `
+      <div class="empty-state">
+        這個活動目前沒有照片。
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  grid.innerHTML =
+    photos.map((photo, index) => {
+
+      return `
+
+        <div
+          class="photo-manager-item"
+          data-photo-index="${index}"
+        >
+
+          <img
+            src="${photo.url}"
+            alt="第 ${index + 1} 張照片"
+          >
+
+
+          <button
+            type="button"
+            class="photo-manager-delete"
+            data-delete-photo="${index}"
+          >
+            刪除
+          </button>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+}
+
+// ==========================================================
+// 關閉照片管理視窗
+// ==========================================================
+
+function closePhotoManager() {
+
+  document
+    .getElementById(
+      "photoManagerModal"
+    )
+    .classList
+    .add("hidden");
+
+
+  currentManagingEvent = null;
+
+}
+
+
+document
+  .getElementById(
+    "closePhotoManager"
+  )
+  ?.addEventListener(
+    "click",
+    closePhotoManager
+  );
+
+
+document
+  .getElementById(
+    "closePhotoManagerBottom"
+  )
+  ?.addEventListener(
+    "click",
+    closePhotoManager
   );
 
 // ==========================================================
@@ -1650,6 +1871,61 @@ document.getElementById("closeAdmin").addEventListener("click", () => modal.clas
 modal.addEventListener("click", e => {
   if (e.target === modal) modal.classList.add("hidden");
 });
+
+<!-- =====================================================
+     老師：照片管理視窗
+     ===================================================== -->
+
+<div id="photoManagerModal" class="photo-manager-modal hidden">
+
+  <div class="photo-manager-content">
+
+    <div class="photo-manager-header">
+
+      <div>
+        <span class="eyebrow">PHOTO MANAGER</span>
+
+        <h3 id="photoManagerTitle">
+          活動照片
+        </h3>
+
+      </div>
+
+      <button
+        type="button"
+        id="closePhotoManager"
+        class="modal-close"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- 照片會放在這裡 -->
+
+    <div
+      id="photoManagerGrid"
+      class="photo-manager-grid"
+    >
+    </div>
+
+
+    <div class="photo-manager-footer">
+
+      <button
+        type="button"
+        id="closePhotoManagerBottom"
+        class="secondary-btn"
+      >
+        關閉
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
 // ---------- 8. 首頁照片 ----------
 document.getElementById("saveHomePhotos").addEventListener("click", async () => {
