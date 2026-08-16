@@ -294,6 +294,11 @@ function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
+
+// ==========================================
+// 將壓縮後的 WebP 照片上傳到 Firebase Storage
+// ==========================================
+
 // ---------- 3. 圖片壓縮：最大寬度 1600px、WebP ----------
 function compressImage(file, maxWidth = 1600, quality = 0.85) {
   return new Promise((resolve, reject) => {
@@ -328,46 +333,37 @@ function compressImage(file, maxWidth = 1600, quality = 0.85) {
   });
 }
 
-// ==========================================
-// 將壓縮後的 WebP 照片上傳到 Firebase Storage
-// ==========================================
+
+// ==========================================================
+// 上傳照片到 Firebase Storage
+//
+// dataUrl：壓縮後的 WebP 照片
+// eventId：活動 ID
+// fileName：照片檔名
+//
+// 回傳：照片網址 + Storage 路徑
+// ==========================================================
 
 async function uploadPhotoToStorage(
   dataUrl,
-  fileName,
-  eventId
+  eventId,
+  fileName
 ) {
 
-  // ======================================================
-  // 建立照片在 Firebase Storage 裡面的路徑
-  //
-  // 每個活動都有自己的資料夾
-  //
-  // 例如：
-  //
-  // events/
-  //   abc123/
-  //      1.webp
-  //      2.webp
-  //      3.webp
-  //
-  // ======================================================
-
+  // Firebase Storage 中的實際路徑
   const storagePath =
-    "events/" +
-    eventId +
-    "/" +
-    fileName;
+    `events/${eventId}/${fileName}`;
 
 
   // 建立 Storage 參照
-  const storageRef = ref(
-    storage,
-    storagePath
-  );
+  const storageRef =
+    ref(
+      storage,
+      storagePath
+    );
 
 
-  // 把 Data URL 上傳到 Storage
+  // 上傳 Data URL
   await uploadString(
     storageRef,
     dataUrl,
@@ -380,7 +376,9 @@ async function uploadPhotoToStorage(
 
   // 取得照片網址
   const downloadURL =
-    await getDownloadURL(storageRef);
+    await getDownloadURL(
+      storageRef
+    );
 
 
   console.log(
@@ -389,7 +387,15 @@ async function uploadPhotoToStorage(
   );
 
 
-  return downloadURL;
+  // 同時回傳網址與 Storage 路徑
+  return {
+
+    url: downloadURL,
+
+    storagePath: storagePath
+
+  };
+
 }
 
 // ---------- 4. 首頁輪播 ----------
@@ -2591,6 +2597,29 @@ document
       button.textContent =
         "照片上傳中，請稍候…";
 
+      // ======================================================
+// 先建立 Firestore 活動文件
+//
+// 先取得活動 ID，之後照片就可以使用：
+//
+// events/活動ID/照片檔名.webp
+// ======================================================
+
+const eventRef =
+  doc(
+    collection(db, "events")
+  );
+
+
+const eventId =
+  eventRef.id;
+
+
+console.log(
+  "建立活動 ID：",
+  eventId
+);
+
 
       const uploadedPhotos = [];
 
@@ -2635,27 +2664,24 @@ document
         // 上傳到 Storage
         // -----------------------------------------------
 
-        const downloadURL =
-          await uploadPhotoToStorage(
-            photo.dataUrl,
-            fileName,
-            eventId
-          );
+      const uploadedPhoto =
+  await uploadPhotoToStorage(
+    photo.dataUrl,
+    eventId,
+    fileName
+  );
 
 
-        // -----------------------------------------------
-        // 儲存照片資訊
-        // -----------------------------------------------
+uploadedPhotos.push({
 
-        uploadedPhotos.push({
+  url: uploadedPhoto.url,
 
-          url:
-            downloadURL,
+  storagePath:
+    uploadedPhoto.storagePath,
 
-          order:
-            i + 1
+  order: i + 1
 
-        });
+});
 
       }
 
