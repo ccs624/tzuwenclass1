@@ -1387,15 +1387,13 @@ function renderPreview() {
 
 
             <!-- 刪除按鈕 -->
-            <button
-              type="button"
-              class="preview-delete"
-              data-delete-index="${index}"
-              title="刪除這張照片"
-            >
-              
-            </button>
-
+          <button
+  type="button"
+  class="preview-delete"
+  data-delete-index="${index}"
+>
+  刪除
+</button>
 
             <!-- 照片 -->
             <img
