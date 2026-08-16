@@ -37,7 +37,8 @@ import {
   getStorage,
   ref,
   uploadString,
-  getDownloadURL
+  getDownloadURL,
+  deleteObject
 } from
   "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
@@ -501,6 +502,133 @@ const eventsRef = collection(db, "events");
     console.error("讀取 Firestore 活動失敗：", error);
 
     return [];
+
+  }
+
+}
+
+
+// ==========================================================
+// 刪除整個活動
+//
+// 會同時刪除：
+//
+// 1. Firebase Storage 裡這個活動的照片
+// 2. Firestore 裡的活動資料
+//
+// ==========================================================
+
+async function deleteEventFromFirebase(eventId, eventData) {
+
+  try {
+
+    console.log(
+      "開始刪除活動：",
+      eventId
+    );
+
+
+    // ======================================================
+    // ① 刪除 Firebase Storage 裡的照片
+    // ======================================================
+
+    const photos =
+      eventData.photos || [];
+
+
+    for (
+      let i = 0;
+      i < photos.length;
+      i++
+    ) {
+
+      const photo =
+        photos[i];
+
+
+      // ----------------------------------------------------
+      // 取得照片網址中的 Storage 路徑
+      //
+      // 因為 Firestore 現在有：
+      //
+      // events / 活動ID / 001.webp
+      //
+      // 所以我們直接使用活動 ID + 照片編號。
+      // ----------------------------------------------------
+
+      const fileName =
+        `${String(
+          photo.order
+        ).padStart(3, "0")}.webp`;
+
+
+      const photoRef =
+        ref(
+          storage,
+          `events/${eventId}/${fileName}`
+        );
+
+
+      try {
+
+        await deleteObject(
+          photoRef
+        );
+
+
+        console.log(
+          "照片刪除成功：",
+          fileName
+        );
+
+
+      } catch (photoError) {
+
+        // 如果 Storage 裡找不到照片，
+        // 不要讓整個活動刪除失敗。
+
+        console.warn(
+          "照片刪除失敗或照片不存在：",
+          fileName,
+          photoError
+        );
+
+      }
+
+    }
+
+
+    // ======================================================
+    // ② 刪除 Firestore 活動資料
+    // ======================================================
+
+    await deleteDoc(
+      doc(
+        db,
+        "events",
+        eventId
+      )
+    );
+
+
+    console.log(
+      "Firestore 活動刪除成功：",
+      eventId
+    );
+
+
+    return true;
+
+
+  } catch (error) {
+
+    console.error(
+      "刪除活動失敗：",
+      error
+    );
+
+
+    return false;
 
   }
 
@@ -2047,6 +2175,108 @@ window.testFirebaseStorage = async function () {
     console.error(
       "Firebase Storage 測試失敗：",
       error
+    );
+
+  }
+
+};
+
+// ==========================================================
+// 測試刪除活動
+//
+// 使用方式：
+//
+// 在 Console 輸入：
+//
+// testDeleteEvent("你的活動ID")
+//
+// ==========================================================
+
+window.testDeleteEvent = async function(eventId) {
+
+  if (!eventId) {
+
+    console.log(
+      "請輸入活動 ID。"
+    );
+
+    return;
+
+  }
+
+
+  // 從 Firestore 找活動
+  const eventRef =
+    doc(
+      db,
+      "events",
+      eventId
+    );
+
+
+  const eventSnapshot =
+    await getDoc(
+      eventRef
+    );
+
+
+  if (!eventSnapshot.exists()) {
+
+    console.log(
+      "找不到這個活動。"
+    );
+
+    return;
+
+  }
+
+
+  const eventData =
+    eventSnapshot.data();
+
+
+  console.log(
+    "準備刪除活動：",
+    eventData
+  );
+
+
+  const confirmed =
+    confirm(
+      `確定要刪除「${eventData.name}」嗎？\n\n` +
+      `照片數量：${(eventData.photos || []).length} 張\n\n` +
+      `刪除後無法復原。`
+    );
+
+
+  if (!confirmed) {
+
+    console.log(
+      "已取消刪除。"
+    );
+
+    return;
+
+  }
+
+
+  const success =
+    await deleteEventFromFirebase(
+      eventId,
+      eventData
+    );
+
+
+  if (success) {
+
+    console.log(
+      "測試刪除成功！"
+    );
+
+  } else {
+
+    console.log(
+      "測試刪除失敗，請查看 Console。"
     );
 
   }
