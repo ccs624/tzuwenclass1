@@ -38,13 +38,11 @@ import {
 import {
   getStorage,
   ref,
+  refFromURL,
   uploadString,
   getDownloadURL,
-  deleteObject,
-  refFromURL
-} from
-  "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
-
+  deleteObject
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 // Firebase 專案設定
 
 const firebaseConfig = {
