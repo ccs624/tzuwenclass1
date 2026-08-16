@@ -925,3 +925,137 @@ footer {
   }
 
 }
+
+/* ==========================================================
+   老師管理：已發布活動
+   ========================================================== */
+
+.admin-event-list {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+
+  margin-top: 16px;
+
+}
+
+
+/* 單一活動 */
+
+.admin-event-item {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 16px 18px;
+
+  background: #faf8f2;
+
+  border: 1px solid #e7dfd0;
+
+  border-radius: 14px;
+
+}
+
+
+/* 活動資訊 */
+
+.admin-event-info {
+
+  min-width: 0;
+
+}
+
+
+.admin-event-info h4 {
+
+  margin: 0 0 5px;
+
+  font-size: 17px;
+
+}
+
+
+.admin-event-meta {
+
+  font-size: 14px;
+
+  color: #777;
+
+}
+
+
+/* 按鈕區 */
+
+.admin-event-actions {
+
+  display: flex;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+
+}
+
+
+/* 刪除活動 */
+
+.admin-delete-btn {
+
+  border: none;
+
+  border-radius: 9px;
+
+  padding: 8px 14px;
+
+  background: #f1dfd6;
+
+  color: #795548;
+
+  cursor: pointer;
+
+}
+
+
+.admin-delete-btn:hover {
+
+  background: #e8cfc3;
+
+}
+
+
+/* 手機 */
+
+@media (max-width: 600px) {
+
+  .admin-event-item {
+
+    align-items: flex-start;
+
+    flex-direction: column;
+
+  }
+
+
+  .admin-event-actions {
+
+    width: 100%;
+
+  }
+
+
+  .admin-event-actions button {
+
+    flex: 1;
+
+  }
+
+}
