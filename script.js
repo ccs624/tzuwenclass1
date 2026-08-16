@@ -2605,10 +2605,7 @@ document
 // events/活動ID/照片檔名.webp
 // ======================================================
 
-const eventRef =
-  doc(
-    collection(db, "events")
-  );
+
 
 
 const eventId =
