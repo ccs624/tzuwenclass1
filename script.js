@@ -918,14 +918,15 @@ document
     }
   );
 
+
 // ==========================================================
-// 顯示目前活動的照片
+// 照片管理視窗
 //
 // 功能：
-// 1. 顯示照片
-// 2. 支援拖曳排序
-// 3. 顯示照片編號
-// 4. 提供刪除按鈕
+// 1. 顯示活動照片
+// 2. 拖曳排序
+// 3. 顯示照片順序
+// 4. 提供「刪除」按鈕
 // ==========================================================
 
 function renderPhotoManager() {
@@ -936,7 +937,7 @@ function renderPhotoManager() {
     );
 
 
-  // 如果找不到照片管理區
+  // 找不到照片管理區
   if (!box) {
 
     console.warn(
@@ -948,7 +949,7 @@ function renderPhotoManager() {
   }
 
 
-  // 沒有正在管理的活動
+  // 沒有選擇活動
   if (!currentManagingEvent) {
 
     box.innerHTML =
@@ -975,7 +976,7 @@ function renderPhotoManager() {
 
 
   // ========================================================
-  // 建立照片列表
+  // 建立照片管理介面
   // ========================================================
 
   box.innerHTML =
@@ -988,29 +989,34 @@ function renderPhotoManager() {
           data-photo-index="${index}"
         >
 
+          <!-- 拖曳提示 -->
           <div class="photo-drag-handle">
             ☷
           </div>
 
 
+          <!-- 照片 -->
           <img
             src="${photo.url}"
             alt="第 ${index + 1} 張照片"
           >
 
 
+          <!-- 照片資訊 -->
           <div class="photo-manager-info">
 
             <span>
               第 ${index + 1} 張
             </span>
 
+
+            <!-- 刪除按鈕 -->
             <button
               type="button"
               class="delete-photo-btn"
               data-delete-photo="${index}"
             >
-              刪除
+              刪除照片
             </button>
 
           </div>
@@ -1021,10 +1027,7 @@ function renderPhotoManager() {
     ).join("");
 
 
-  // ========================================================
-  // 啟用拖曳
-  // ========================================================
-
+  // 啟用拖曳排序
   setupPhotoDragAndDrop();
 
 }
