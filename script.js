@@ -932,85 +932,57 @@ document
 function renderPhotoManager() {
 
   const box =
-    document.getElementById(
-      "photoManagerGrid"
-    );
+    document.getElementById("photoManagerGrid");
 
-
-  // 找不到照片管理區
   if (!box) {
-
-    console.warn(
-      "找不到 photoManagerGrid"
-    );
-
+    console.error("找不到 photoManagerGrid");
     return;
-
   }
 
-
-  // 沒有選擇活動
   if (!currentManagingEvent) {
-
-    box.innerHTML =
-      `<p>目前沒有選擇活動。</p>`;
-
+    box.innerHTML = "<p>目前沒有選擇活動。</p>";
     return;
-
   }
-
 
   const photos =
     currentManagingEvent.photos || [];
 
-
-  // 沒有照片
   if (!photos.length) {
-
     box.innerHTML =
-      `<p>這個活動目前沒有照片。</p>`;
-
+      "<p>這個活動目前沒有照片。</p>";
     return;
-
   }
 
 
-  // ========================================================
-  // 建立照片管理介面
-  // ========================================================
+  // ======================================================
+  // 產生照片管理介面
+  // ======================================================
 
-  box.innerHTML =
-    photos.map(
-      (photo, index) => `
+  box.innerHTML = photos.map(
+    (photo, index) => {
 
+      return `
         <div
           class="photo-manager-item"
           draggable="true"
           data-photo-index="${index}"
         >
 
-          <!-- 拖曳提示 -->
           <div class="photo-drag-handle">
             ☷
           </div>
 
-
-          <!-- 照片 -->
           <img
             src="${photo.url}"
             alt="第 ${index + 1} 張照片"
           >
 
-
-          <!-- 照片資訊 -->
           <div class="photo-manager-info">
 
             <span>
               第 ${index + 1} 張
             </span>
 
-
-            <!-- 刪除按鈕 -->
             <button
               type="button"
               class="delete-photo-btn"
@@ -1022,9 +994,10 @@ function renderPhotoManager() {
           </div>
 
         </div>
+      `;
 
-      `
-    ).join("");
+    }
+  ).join("");
 
 
   // 啟用拖曳排序
