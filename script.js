@@ -1203,10 +1203,11 @@ function setupPhotoDragAndDrop() {
 // ==========================================================
 // 刪除活動中的單張照片
 //
-// 會做兩件事：
+// 刪除流程：
 //
-// 1. 刪除 Firebase Storage 裡的照片
-// 2. 更新 Firestore 裡的 photos 陣列
+// 1. 先從 Firebase Storage 刪除實體照片
+// 2. 再更新 Firestore
+// 3. 最後更新畫面
 //
 // ==========================================================
 
@@ -1225,7 +1226,79 @@ async function deleteSinglePhoto(
 
 
     // ======================================================
-    // ① 更新 Firestore 的照片清單
+    // ① 如果有 Storage 路徑，就刪除 Storage 實體照片
+    // ======================================================
+
+    if (photo.storagePath) {
+
+      try {
+
+        const photoRef =
+          ref(
+            storage,
+            photo.storagePath
+          );
+
+
+        await deleteObject(
+          photoRef
+        );
+
+
+        console.log(
+          "Firebase Storage 照片刪除成功：",
+          photo.storagePath
+        );
+
+
+      } catch (storageError) {
+
+        console.error(
+          "Firebase Storage 照片刪除失敗：",
+          storageError
+        );
+
+
+        /*
+          這裡非常重要：
+
+          如果 Storage 刪除失敗，
+          就不要繼續刪 Firestore。
+
+          否則可能造成：
+
+          Storage 還有照片
+          ↓
+          Firestore 卻沒有照片資料
+
+          所以直接丟出錯誤。
+        */
+
+        throw storageError;
+
+      }
+
+    } else {
+
+      /*
+        舊活動的照片可能沒有 storagePath。
+
+        這些照片我們無法安全地知道
+        Storage 裡的實際位置。
+
+        因此舊照片先只從 Firestore 移除。
+      */
+
+      console.warn(
+        "這張照片沒有 storagePath，" +
+        "因此只會從 Firestore 移除。"
+      );
+
+    }
+
+
+    // ======================================================
+    // ② 更新 Firestore
     // ======================================================
 
     const eventRef =
@@ -1250,6 +1323,17 @@ async function deleteSinglePhoto(
     );
 
 
+    // 重新整理 order
+    updatedPhotos.forEach(
+      (item, index) => {
+
+        item.order =
+          index + 1;
+
+      }
+    );
+
+
     // 更新 Firestore
     await updateDoc(
       eventRef,
@@ -1265,22 +1349,33 @@ async function deleteSinglePhoto(
 
 
     // ======================================================
-    // ② 更新目前畫面
+    // ③ 更新目前活動資料
     // ======================================================
 
     currentManagingEvent.photos =
       updatedPhotos;
 
 
+    // 重新顯示照片
     renderPhotoManager();
 
 
-    // 更新老師活動列表
-    await renderAdminEventList();
+    // ======================================================
+    // ④ 更新活動列表
+    // ======================================================
+
+    if (
+      typeof renderAdminEventList ===
+      "function"
+    ) {
+
+      await renderAdminEventList();
+
+    }
 
 
     console.log(
-      "照片已從網站活動中移除！"
+      "照片刪除完成！"
     );
 
 
