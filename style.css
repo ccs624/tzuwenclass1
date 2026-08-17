@@ -1264,6 +1264,58 @@ footer {
 
     gap: 10px;
 
+    /* ==========================================================
+   照片管理視窗
+   ========================================================== */
+
+.photo-manager-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.photo-manager-item img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  background: #f5f1e8;
+  border-radius: 12px;
+}
+
+
+.photo-manager-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+
+.delete-photo-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  background: #d96c5f;
+  color: white;
+  font-size: 14px;
+}
+
+
+.delete-photo-btn:hover {
+  opacity: 0.85;
+}
+
+
+.photo-drag-handle {
+  cursor: grab;
+  text-align: center;
+  font-size: 20px;
+  color: #777;
+}
+
   }
 
 }
