@@ -3254,3 +3254,136 @@ window.testDeleteEvent = async function(eventId) {
   }
 
 };
+
+
+// ==========================================================
+// 儲存照片排序
+// ==========================================================
+
+document
+  .getElementById(
+    "savePhotoOrder"
+  )
+  ?.addEventListener(
+    "click",
+    async () => {
+
+
+      // 沒有活動
+      if (!currentManagingEvent) {
+
+        alert(
+          "目前沒有正在管理的活動。"
+        );
+
+        return;
+
+      }
+
+
+      const button =
+        document.getElementById(
+          "savePhotoOrder"
+        );
+
+
+      button.disabled = true;
+
+      button.textContent =
+        "儲存中…";
+
+
+      try {
+
+        // ====================================================
+        // 重新整理照片 order
+        // ====================================================
+
+        const photos =
+          currentManagingEvent.photos
+            .map(
+              (photo, index) => ({
+
+                ...photo,
+
+                order:
+                  index + 1
+
+              })
+            );
+
+
+        // ====================================================
+        // 更新 Firestore
+        // ====================================================
+
+        const eventRef =
+          doc(
+            db,
+            "events",
+            currentManagingEvent.id
+          );
+
+
+        await updateDoc(
+          eventRef,
+          {
+            photos: photos
+          }
+        );
+
+
+        // 更新目前活動
+        currentManagingEvent.photos =
+          photos;
+
+
+        console.log(
+          "照片順序已成功儲存：",
+          photos
+        );
+
+
+        // ====================================================
+        // 重新載入網站活動資料
+        // ====================================================
+
+        if (
+          typeof loadEventsFromFirestore ===
+          "function"
+        ) {
+
+          await loadEventsFromFirestore();
+
+        }
+
+
+        alert(
+          "照片順序已成功儲存！"
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "儲存照片順序失敗：",
+          error
+        );
+
+
+        alert(
+          "照片順序儲存失敗，請查看 Console。"
+        );
+
+
+      } finally {
+
+        button.disabled = false;
+
+        button.textContent =
+          "儲存照片順序";
+
+      }
+
+    }
+  );
