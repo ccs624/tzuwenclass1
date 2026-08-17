@@ -1319,3 +1319,62 @@ footer {
   }
 
 }
+
+/* ==========================================================
+   照片管理：刪除按鈕
+   ========================================================== */
+
+.photo-manager-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+
+/* 刪除照片按鈕 */
+.delete-photo-btn {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 8px;
+
+  padding: 8px 14px;
+
+  background: #d96c5f;
+  color: #ffffff;
+
+  font-size: 14px;
+  line-height: 1.4;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+
+/* 滑鼠移上去 */
+.delete-photo-btn:hover {
+  opacity: 0.85 !important;
+}
+
+
+/* 手機版 */
+@media (max-width: 600px) {
+
+  .photo-manager-info {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .delete-photo-btn {
+    width: 100%;
+  }
+
+}
