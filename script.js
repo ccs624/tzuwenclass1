@@ -920,19 +920,39 @@ document
 
 // ==========================================================
 // 顯示目前活動的照片
+//
+// 功能：
+// 1. 顯示照片
+// 2. 支援拖曳排序
+// 3. 顯示照片編號
+// 4. 提供刪除按鈕
 // ==========================================================
 
 function renderPhotoManager() {
 
-  const grid =
+  const box =
     document.getElementById(
       "photoManagerGrid"
     );
 
 
+  // 如果找不到照片管理區
+  if (!box) {
+
+    console.warn(
+      "找不到 photoManagerGrid"
+    );
+
+    return;
+
+  }
+
+
+  // 沒有正在管理的活動
   if (!currentManagingEvent) {
 
-    grid.innerHTML = "";
+    box.innerHTML =
+      `<p>目前沒有選擇活動。</p>`;
 
     return;
 
@@ -946,26 +966,32 @@ function renderPhotoManager() {
   // 沒有照片
   if (!photos.length) {
 
-    grid.innerHTML = `
-      <div class="empty-state">
-        這個活動目前沒有照片。
-      </div>
-    `;
+    box.innerHTML =
+      `<p>這個活動目前沒有照片。</p>`;
 
     return;
 
   }
 
 
-  grid.innerHTML =
-    photos.map((photo, index) => {
+  // ========================================================
+  // 建立照片列表
+  // ========================================================
 
-      return `
+  box.innerHTML =
+    photos.map(
+      (photo, index) => `
 
         <div
           class="photo-manager-item"
+          draggable="true"
           data-photo-index="${index}"
         >
+
+          <div class="photo-drag-handle">
+            ☷
+          </div>
+
 
           <img
             src="${photo.url}"
@@ -973,19 +999,204 @@ function renderPhotoManager() {
           >
 
 
-          <button
-            type="button"
-            class="photo-manager-delete"
-            data-delete-photo="${index}"
-          >
-            刪除
-          </button>
+          <div class="photo-manager-info">
+
+            <span>
+              第 ${index + 1} 張
+            </span>
+
+            <button
+              type="button"
+              class="delete-photo-btn"
+              data-delete-photo="${index}"
+            >
+              刪除
+            </button>
+
+          </div>
 
         </div>
 
-      `;
+      `
+    ).join("");
 
-    }).join("");
+
+  // ========================================================
+  // 啟用拖曳
+  // ========================================================
+
+  setupPhotoDragAndDrop();
+
+}
+
+
+// ==========================================================
+// 照片拖曳排序
+// ==========================================================
+
+let draggedPhotoIndex = null;
+
+
+function setupPhotoDragAndDrop() {
+
+  const box =
+    document.getElementById(
+      "photoManagerGrid"
+    );
+
+
+  if (!box) {
+    return;
+  }
+
+
+  const photoItems =
+    box.querySelectorAll(
+      ".photo-manager-item"
+    );
+
+
+  photoItems.forEach(item => {
+
+
+    // ======================================================
+    // 開始拖曳
+    // ======================================================
+
+    item.addEventListener(
+      "dragstart",
+      () => {
+
+        draggedPhotoIndex =
+          Number(
+            item.dataset.photoIndex
+          );
+
+
+        item.classList.add(
+          "dragging"
+        );
+
+      }
+    );
+
+
+    // ======================================================
+    // 結束拖曳
+    // ======================================================
+
+    item.addEventListener(
+      "dragend",
+      () => {
+
+        item.classList.remove(
+          "dragging"
+        );
+
+        draggedPhotoIndex = null;
+
+      }
+    );
+
+
+    // ======================================================
+    // 拖曳經過
+    // ======================================================
+
+    item.addEventListener(
+      "dragover",
+      event => {
+
+        event.preventDefault();
+
+      }
+    );
+
+
+    // ======================================================
+    // 放下照片
+    // ======================================================
+
+    item.addEventListener(
+      "drop",
+      event => {
+
+        event.preventDefault();
+
+
+        if (
+          draggedPhotoIndex === null
+        ) {
+
+          return;
+
+        }
+
+
+        const targetIndex =
+          Number(
+            item.dataset.photoIndex
+          );
+
+
+        // 如果放在自己身上
+        if (
+          draggedPhotoIndex ===
+          targetIndex
+        ) {
+
+          return;
+
+        }
+
+
+        // 取得目前照片
+        const photos =
+          currentManagingEvent.photos;
+
+
+        // 移除被拖曳的照片
+        const [
+          draggedPhoto
+        ] =
+          photos.splice(
+            draggedPhotoIndex,
+            1
+          );
+
+
+        // 放到新的位置
+        photos.splice(
+          targetIndex,
+          0,
+          draggedPhoto
+        );
+
+
+        // 重新計算 order
+        photos.forEach(
+          (photo, index) => {
+
+            photo.order =
+              index + 1;
+
+          }
+        );
+
+
+        // 更新目前畫面
+        renderPhotoManager();
+
+
+        console.log(
+          "照片新順序：",
+          photos
+        );
+
+      }
+    );
+
+  });
 
 }
 
