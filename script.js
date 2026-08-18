@@ -399,6 +399,88 @@ async function uploadPhotoToStorage(
 }
 
 // ---------- 4. 首頁輪播 ----------
+
+// ==========================================================
+// 從 Firebase Firestore 讀取首頁照片
+// ==========================================================
+
+async function loadHomePhotosFromFirestore() {
+
+  try {
+
+    const homepageRef =
+      doc(
+        db,
+        "settings",
+        "homepage"
+      );
+
+
+    const homepageSnap =
+      await getDoc(homepageRef);
+
+
+    if (!homepageSnap.exists()) {
+
+      console.log(
+        "Firebase 目前沒有首頁照片。"
+      );
+
+      return [];
+
+    }
+
+
+    const data =
+      homepageSnap.data();
+
+
+    const photos =
+      data.photos || [];
+
+
+    console.log(
+      "Firebase 首頁照片：",
+      photos
+    );
+
+
+    // 儲存到目前網站資料
+    // 讓原本的輪播函式可以繼續使用
+
+    const localData =
+      loadData();
+
+    localData.homePhotos =
+      photos.map(photo => photo.url);
+
+    saveData(localData);
+
+
+    // 更新首頁輪播
+
+    renderSlideshow();
+
+
+    return photos;
+
+
+  } catch (error) {
+
+    console.error(
+      "讀取 Firebase 首頁照片失敗：",
+      error
+    );
+
+    return [];
+
+  }
+
+}
+
+
+
+
 let slideIndex = 0;
 let slideTimer;
 
@@ -422,7 +504,7 @@ function renderSlideshow() {
   if (data.homePhotos.length > 1) {
     slideTimer = setInterval(() => {
       slideIndex = (slideIndex + 1) % data.homePhotos.length;
-      Slideshow();
+      renderSlideshow();
     }, 4000);
   }
 }
@@ -434,14 +516,14 @@ document.getElementById("prevSlide").addEventListener("click", () => {
   const data = loadData();
   if (!data.homePhotos.length) return;
   slideIndex = (slideIndex - 1 + data.homePhotos.length) % data.homePhotos.length;
-  Slideshow();
+  renderSlideshow();
 });
 
 document.getElementById("nextSlide").addEventListener("click", () => {
   const data = loadData();
   if (!data.homePhotos.length) return;
   slideIndex = (slideIndex + 1) % data.homePhotos.length;
-  Slideshow();
+  renderSlideshow();
 });
 
 // ---------- 5. 課表 ----------
@@ -2390,27 +2472,191 @@ modal.addEventListener("click", e => {
 
 
 // ---------- 8. 首頁照片 ----------
+// ==========================================================
+// 首頁照片：上傳到 Firebase Storage
+// ==========================================================
+
 document.getElementById("saveHomePhotos").addEventListener("click", async () => {
+
   const input = document.getElementById("homePhotosInput");
-  if (!input.files.length) return alert("請先選擇照片。");
 
-  const data = loadData();
-  const results = [];
+  // ---------- 檢查是否有選照片 ----------
 
-  for (const file of input.files) {
-    try {
-      const result = await compressImage(file);
-      results.push(result.dataUrl);
-    } catch {
-      alert(`「${file.name}」處理失敗。`);
-    }
+  if (!input.files.length) {
+    alert("請先選擇照片。");
+    return;
   }
 
-  data.homePhotos.push(...results);
-  saveData(data);
-  input.value = "";
-  renderSlideshow();
-  alert(`已加入 ${results.length} 張首頁照片。`);
+
+  // ---------- 防止重複按按鈕 ----------
+
+  const button = document.getElementById("saveHomePhotos");
+
+  button.disabled = true;
+  button.textContent = "照片上傳中，請稍候…";
+
+
+  try {
+
+    console.log(
+      `開始上傳首頁照片，共 ${input.files.length} 張`
+    );
+
+
+    // ======================================================
+    // 取得目前 Firebase 裡的首頁照片
+    // ======================================================
+
+    let homePhotos = [];
+
+    try {
+
+      const homepageRef = doc(
+        db,
+        "settings",
+        "homepage"
+      );
+
+      const homepageSnap = await getDoc(homepageRef);
+
+      if (homepageSnap.exists()) {
+
+        homePhotos =
+          homepageSnap.data().photos || [];
+
+      }
+
+    } catch (error) {
+
+      console.warn(
+        "讀取原本首頁照片失敗，將建立新的首頁照片資料。",
+        error
+      );
+
+    }
+
+
+    // ======================================================
+    // 逐張壓縮＋上傳
+    // ======================================================
+
+    for (let i = 0; i < input.files.length; i++) {
+
+      const file = input.files[i];
+
+      console.log(
+        `正在處理第 ${i + 1} / ${input.files.length} 張`
+      );
+
+
+      // ---------- 壓縮照片 ----------
+
+      const result =
+        await compressImage(file);
+
+
+      console.log(
+        "首頁照片壓縮完成：",
+        result
+      );
+
+
+      // ---------- 建立檔名 ----------
+
+      const fileName =
+        `home-${Date.now()}-${i + 1}.webp`;
+
+
+      // ---------- 上傳 Firebase Storage ----------
+
+      const downloadURL =
+        await uploadPhotoToStorage(
+          result.dataUrl,
+          fileName
+        );
+
+
+      // ---------- 加入首頁照片資料 ----------
+
+      homePhotos.push({
+
+        url: downloadURL,
+
+        order:
+          homePhotos.length + 1
+
+      });
+
+
+      console.log(
+        `第 ${i + 1} 張首頁照片上傳成功`
+      );
+
+    }
+
+
+    // ======================================================
+    // 儲存首頁照片清單到 Firestore
+    // ======================================================
+
+    await setDoc(
+
+      doc(
+        db,
+        "settings",
+        "homepage"
+      ),
+
+      {
+        photos: homePhotos,
+        updatedAt: serverTimestamp()
+      }
+
+    );
+
+
+    console.log(
+      "首頁照片資料已成功儲存到 Firestore：",
+      homePhotos
+    );
+
+
+    // ---------- 清除選擇 ----------
+
+    input.value = "";
+
+
+    // ---------- 重新讀取首頁照片 ----------
+
+    await loadHomePhotosFromFirestore();
+
+
+    alert(
+      `已成功加入 ${input.files.length} 張首頁照片！`
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "首頁照片上傳失敗：",
+      error
+    );
+
+
+    alert(
+      "首頁照片上傳失敗，請查看 Console 的錯誤訊息。"
+    );
+
+
+  } finally {
+
+    button.disabled = false;
+
+    button.textContent = "加入首頁輪播";
+
+  }
+
 });
 
 // ---------- 9. 課表 ----------
@@ -3138,7 +3384,7 @@ document.getElementById("clearAllData").addEventListener("click", () => {
 
 // ---------- 啟動網站 ----------
 updateClassTitle();
-renderSlideshow();
+loadHomePhotosFromFirestore();
 renderSchedule();
 renderEvents();
 
