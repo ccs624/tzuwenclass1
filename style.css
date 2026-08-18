@@ -429,3 +429,41 @@ footer {
 #logoutButton {
   margin-top: 12px;
 }
+
+/* ==========================================
+   照片管理器
+   讓照片下方的資訊與刪除按鈕正常顯示
+   ========================================== */
+
+.photo-manager-item {
+  height: auto;
+  overflow: visible;
+}
+
+.photo-manager-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 52px;
+  padding: 8px;
+}
+
+.delete-photo-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  width: 84px;
+  height: 36px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: rgb(217, 108, 95);
+  color: white;
+
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
