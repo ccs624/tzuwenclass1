@@ -1381,23 +1381,33 @@ footer {
 
 /* ==========================================
    照片管理器
-   讓照片下方的資訊與刪除按鈕正常顯示
+   修正照片下方資訊被裁切的問題
    ========================================== */
 
 .photo-manager-item {
-  height: auto;
-  overflow: visible;
+  height: auto !important;
+  overflow: visible !important;
 }
 
+
+/* 照片下方的資訊區 */
 .photo-manager-info {
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: space-between;
+
   gap: 8px;
+
+  width: 100%;
   min-height: 52px;
+
   padding: 8px;
+
+  box-sizing: border-box;
 }
 
+
+/* 刪除照片按鈕 */
 .delete-photo-btn {
   display: flex !important;
   align-items: center;
@@ -1406,6 +1416,8 @@ footer {
   width: 84px;
   height: 36px;
 
+  padding: 8px 14px;
+
   border: none;
   border-radius: 8px;
 
@@ -1413,6 +1425,29 @@ footer {
   color: white;
 
   font-size: 14px;
+
   cursor: pointer;
+
   flex-shrink: 0;
+}
+
+
+/* 滑鼠移到刪除按鈕 */
+.delete-photo-btn:hover {
+  opacity: 0.85;
+}
+
+
+/* 手機版 */
+@media (max-width: 600px) {
+
+  .photo-manager-info {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .delete-photo-btn {
+    width: 100%;
+  }
+
 }
