@@ -480,35 +480,108 @@ async function loadHomePhotosFromFirestore() {
 
 
 
+// ==========================================================
+// 首頁照片輪播
+// ==========================================================
 
 let slideIndex = 0;
 let slideTimer;
 
 function renderSlideshow() {
-  const data = loadData();
-  const box = document.getElementById("homeSlideshow");
-  const indicator = document.getElementById("slideIndicator");
 
-  if (!data.homePhotos.length) {
-    box.innerHTML = '<div class="slide-placeholder"><span>首頁照片輪播區</span></div>';
+  const data = loadData();
+
+  const box =
+    document.getElementById("homeSlideshow");
+
+  const indicator =
+    document.getElementById("slideIndicator");
+
+
+  // ---------- 沒有照片 ----------
+
+  if (!data.homePhotos || !data.homePhotos.length) {
+
+    box.innerHTML =
+      '<div class="slide-placeholder">' +
+      '<span>首頁照片輪播區</span>' +
+      '</div>';
+
     indicator.textContent = "1 / 1";
+
     clearInterval(slideTimer);
+
     return;
   }
 
-  slideIndex = (slideIndex + data.homePhotos.length) % data.homePhotos.length;
-  box.innerHTML = `<img class="slide" src="${data.homePhotos[slideIndex]}" alt="班級活動照片">`;
-  indicator.textContent = `${slideIndex + 1} / ${data.homePhotos.length}`;
+
+  // ---------- 確保目前索引有效 ----------
+
+  slideIndex =
+    (slideIndex + data.homePhotos.length) %
+    data.homePhotos.length;
+
+
+  // ======================================================
+  // 取得照片網址
+  //
+  // Firebase 新格式：
+  // {
+  //   url: "...",
+  //   order: 1
+  // }
+  //
+  // 如果是舊格式：
+  // "https://..."
+  //
+  // 兩種格式都支援
+  // ======================================================
+
+  const currentPhoto =
+    data.homePhotos[slideIndex];
+
+
+  const photoUrl =
+    typeof currentPhoto === "string"
+      ? currentPhoto
+      : currentPhoto.url;
+
+
+  // ---------- 顯示照片 ----------
+
+  box.innerHTML = `
+    <img
+      class="slide"
+      src="${photoUrl}"
+      alt="班級活動照片"
+    >
+  `;
+
+
+  indicator.textContent =
+    `${slideIndex + 1} / ${data.homePhotos.length}`;
+
+
+  // ---------- 自動輪播 ----------
 
   clearInterval(slideTimer);
-  if (data.homePhotos.length > 1) {
-    slideTimer = setInterval(() => {
-      slideIndex = (slideIndex + 1) % data.homePhotos.length;
-      renderSlideshow();
-    }, 4000);
-  }
-}
 
+
+  if (data.homePhotos.length > 1) {
+
+    slideTimer = setInterval(() => {
+
+      slideIndex =
+        (slideIndex + 1) %
+        data.homePhotos.length;
+
+      renderSlideshow();
+
+    }, 4000);
+
+  }
+
+}
 
 
 
