@@ -615,7 +615,7 @@ async function loadScheduleFromFirestore() {
         db,
         "settings",
         "schedule"
-      );
+      ),
 
 
     const scheduleSnap =
