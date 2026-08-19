@@ -618,20 +618,7 @@ async function loadScheduleFromFirestore() {
       ),
 
 
-    const scheduleSnap =
-      await getDoc(scheduleRef);
-
-
-    if (!scheduleSnap.exists()) {
-
-      console.log(
-        "Firebase 目前沒有課表。"
-      );
-
-      renderSchedule();
-
-      return null;
-    }
+    
 
 
     const data =
