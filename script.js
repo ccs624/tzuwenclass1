@@ -620,11 +620,7 @@ async function loadScheduleFromFirestore() {
 
     
 
-    console.log(
-      "Firebase 課表：",
-      data
-    );
-
+   
 
     // 暫時同步到目前網站資料
     // 讓原本的 renderSchedule() 可以繼續使用
