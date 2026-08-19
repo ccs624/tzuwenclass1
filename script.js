@@ -599,6 +599,86 @@ document.getElementById("nextSlide").addEventListener("click", () => {
   renderSlideshow();
 });
 
+
+
+
+// ==========================================================
+// 從 Firebase Firestore 讀取課表
+// ==========================================================
+
+async function loadScheduleFromFirestore() {
+
+  try {
+
+    const scheduleRef =
+      doc(
+        db,
+        "settings",
+        "schedule"
+      );
+
+
+    const scheduleSnap =
+      await getDoc(scheduleRef);
+
+
+    if (!scheduleSnap.exists()) {
+
+      console.log(
+        "Firebase 目前沒有課表。"
+      );
+
+      renderSchedule();
+
+      return null;
+    }
+
+
+    const data =
+      scheduleSnap.data();
+
+
+    console.log(
+      "Firebase 課表：",
+      data
+    );
+
+
+    // 暫時同步到目前網站資料
+    // 讓原本的 renderSchedule() 可以繼續使用
+
+    const localData =
+      loadData();
+
+
+    localData.schedule =
+      data.url || "";
+
+
+    saveData(localData);
+
+
+    // 更新畫面
+
+    renderSchedule();
+
+
+    return data;
+
+
+  } catch (error) {
+
+    console.error(
+      "讀取 Firebase 課表失敗：",
+      error
+    );
+
+
+    return null;
+
+  }
+
+}
 // ---------- 5. 課表 ----------
 function renderSchedule() {
   const data = loadData();
@@ -2733,21 +2813,147 @@ document.getElementById("saveHomePhotos").addEventListener("click", async () => 
 });
 
 // ---------- 9. 課表 ----------
+// ==========================================================
+// 課表：上傳到 Firebase Storage
+// ==========================================================
+
 document.getElementById("saveSchedule").addEventListener("click", async () => {
-  const input = document.getElementById("scheduleInput");
-  if (!input.files[0]) return alert("請先選擇課表照片。");
+
+  const input =
+    document.getElementById("scheduleInput");
+
+
+  // ---------- 檢查是否選擇課表 ----------
+
+  if (!input.files.length) {
+
+    alert("請先選擇課表照片。");
+
+    return;
+  }
+
+
+  const button =
+    document.getElementById("saveSchedule");
+
+
+  // 防止老師重複按按鈕
+
+  button.disabled = true;
+
+  button.textContent =
+    "課表上傳中，請稍候…";
+
 
   try {
-    const result = await compressImage(input.files[0], 2200, 0.9);
-    const data = loadData();
-    data.schedule = result.dataUrl;
-    saveData(data);
-    renderSchedule();
-    input.value = "";
-    alert("課表已更新。");
-  } catch {
-    alert("課表處理失敗。");
+
+    console.log("開始處理課表");
+
+
+  
+
+
+    // ======================================================
+    // 2. 上傳 Firebase Storage
+    // ======================================================
+
+    const fileName =
+      `schedule-${Date.now()}.webp`;
+
+
+    const downloadURL =
+      await uploadPhotoToStorage(
+        result.dataUrl,
+        fileName
+      );
+
+
+    console.log(
+      "課表上傳 Storage 成功：",
+      downloadURL
+    );
+
+
+    // ======================================================
+    // 3. 儲存課表資料到 Firestore
+    // ======================================================
+
+    await setDoc(
+
+      doc(
+        db,
+        "settings",
+        "schedule"
+      ),
+
+      {
+        url: downloadURL,
+
+        await setDoc(
+
+  doc(
+    db,
+    "settings",
+    "schedule"
+  ),
+
+  {
+    url: downloadURL,
+
+    updatedAt:
+      serverTimestamp()
   }
+
+);
+        updatedAt:
+          serverTimestamp()
+      }
+
+    );
+
+
+    console.log(
+      "課表已成功儲存到 Firestore"
+    );
+
+
+    // ======================================================
+    // 4. 更新畫面
+    // ======================================================
+
+    input.value = "";
+
+
+    await loadScheduleFromFirestore();
+
+
+    alert(
+      "課表已成功更新！"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "課表上傳失敗：",
+      error
+    );
+
+
+    alert(
+      "課表上傳失敗，請查看 Console 的錯誤訊息。"
+    );
+
+
+  } finally {
+
+    button.disabled = false;
+
+    button.textContent =
+      "顯示課表";
+
+  }
+
 });
 
 // ==========================================================
@@ -3458,7 +3664,7 @@ document.getElementById("clearAllData").addEventListener("click", () => {
 // ---------- 啟動網站 ----------
 updateClassTitle();
 loadHomePhotosFromFirestore();
-renderSchedule();
+loadScheduleFromFirestore();
 renderEvents();
 
 // ==========================================
