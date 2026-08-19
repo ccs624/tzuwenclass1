@@ -2889,13 +2889,7 @@ document.getElementById("saveSchedule").addEventListener("click", async () => {
       {
         url: downloadURL,
 
-        await setDoc(
-
-  doc(
-    db,
-    "settings",
-    "schedule"
-  ),
+        
 
   {
     url: downloadURL,
