@@ -620,11 +620,6 @@ async function loadScheduleFromFirestore() {
 
     
 
-
-    const data =
-      scheduleSnap.data();
-
-
     console.log(
       "Firebase 課表：",
       data
