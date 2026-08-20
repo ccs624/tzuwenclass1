@@ -2874,22 +2874,11 @@ document.getElementById("saveSchedule").addEventListener("click", async () => {
     );
 
 
-    // ======================================================
-    // 3. 儲存課表資料到 Firestore
-    // ======================================================
+  // ======================================================
+// 3. 儲存課表資料到 Firestore
+// ======================================================
 
-    await setDoc(
-
-      doc(
-        db,
-        "settings",
-        "schedule"
-      ),
-
-      {
-        url: downloadURL,
-
-        await setDoc(
+await setDoc(
 
   doc(
     db,
@@ -2898,25 +2887,19 @@ document.getElementById("saveSchedule").addEventListener("click", async () => {
   ),
 
   {
+    // Firebase Storage 裡課表照片的網址
     url: downloadURL,
 
-    updatedAt:
-      serverTimestamp()
+    // 最後更新時間
+    updatedAt: serverTimestamp()
   }
 
 );
-        updatedAt:
-          serverTimestamp()
-      }
-
-    );
 
 
-    console.log(
-      "課表已成功儲存到 Firestore"
-    );
-
-
+console.log(
+  "課表已成功儲存到 Firestore"
+);
     // ======================================================
     // 4. 更新畫面
     // ======================================================
